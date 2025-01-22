@@ -31,20 +31,15 @@ if (process.env.KEY_FILE && process.env.CERT_FILE) {
 				return fs.readFileSync(f)
 			}),
 	}
-} else {
-	console.log()
-	console.log('###### To run as FTPS server, #####')
-	console.log('### set "KEY_FILE", "CERT_FILE" ###')
-	console.log('###### or "CA_FILES" env vars. ####')
-	console.log()
 }
+const baseDir = path.join('..', 'users');
 
 server = new ftpd.FtpServer(options.host, {
 	getInitialCwd: function () {
-		return '/ftproot'
+		return path.join(baseDir, process.env.usuari);
 	},
 	getRoot: function () {
-		return process.cwd()
+		return path.join(baseDir, process.env.usuari);
 	},
 	pasvPortRangeStart: 1025,
 	pasvPortRangeEnd: 1050,
@@ -73,6 +68,10 @@ server = new ftpd.FtpServer(options.host, {
 		'MDTM',
 		'DELE',
 		'QUIT',
+		'RNFR',
+		'RNTO',
+		'EPSV',
+		'EPRT',
 	],
 })
 
@@ -80,15 +79,14 @@ server.on('error', function (error) {
 	console.log('FTP Server error:', error)
 })
 
-// verify user and password from .env file
 server.on('client:connected', function (connection) {
 	var username = null
 
 	console.log('client connected: ' + connection.remoteAddress)
 
 	connection.on('command:user', function (user, success, failure) {
-		if (user) {
-			username = process.env.USER
+		if (user == process.env.usuari) {
+			username = process.env.usuari
 			success()
 		} else {
 			failure()
@@ -96,9 +94,18 @@ server.on('client:connected', function (connection) {
 	})
 
 	connection.on('command:pass', function (pass, success, failure) {
-		if (process.env.PWD) {
+		if (process.env.paswd == pass) {
 			success(username)
-		} else {
+			fs.exists(
+				path.join('..', 'users', username),
+				(exists) => {
+					exists ?
+						console.log("The directory already exists")
+						:
+						fs.mkdirSync(path.join(baseDir, username))
+				})
+		}
+		else {
 			failure()
 		}
 	})
