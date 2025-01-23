@@ -87,8 +87,6 @@ server.on('client:connected', function (connection) {
 	connection.on('command:mkd', function (dirName) {
 		const userDir = path.join(baseDir, process.env.usuari, dirName);
 		fs.mkdirSync(userDir, { recursive: true });
-		console.log('Directorio creado:', userDir);
-		connection.respond(257, `"${userDir}" created`);
 	});
 
 
