@@ -14,6 +14,8 @@ var options = {
 	tls: null,
 }
 
+// esto es para la clave de seguridad :)
+/*
 if (process.env.KEY_FILE && process.env.CERT_FILE) {
 	console.log('Running as FTPS server')
 	if (process.env.KEY_FILE.charAt(0) !== '/') {
@@ -32,6 +34,7 @@ if (process.env.KEY_FILE && process.env.CERT_FILE) {
 			}),
 	}
 }
+*/
 const baseDir = path.join('./', '..', 'users');
 
 server = new ftpd.FtpServer(options.host, {
@@ -72,6 +75,7 @@ server = new ftpd.FtpServer(options.host, {
 		'RNTO',
 		'EPSV',
 		'EPRT',
+		'RETR',
 	],
 })
 
