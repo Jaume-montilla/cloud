@@ -1,4 +1,7 @@
 <script setup>
+	import list from '../services/ftp.js'
+	let files = list();
+	console.log(files)
 </script>
 
 <template>
