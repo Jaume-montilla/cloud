@@ -35,6 +35,7 @@ if (process.env.KEY_FILE && process.env.CERT_FILE) {
 	}
 }
 */
+
 const baseDir = path.join('./', '..', 'users');
 
 server = new ftpd.FtpServer(options.host, {
@@ -76,6 +77,7 @@ server = new ftpd.FtpServer(options.host, {
 		'EPSV',
 		'EPRT',
 		'RETR',
+		'NLST',
 	],
 })
 
