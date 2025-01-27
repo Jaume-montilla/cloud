@@ -4,7 +4,7 @@
       <img :src="selectedChat.image" alt="Profile" class="profile-pic" />
       <span>{{ selectedChat.name }}</span>
     </div>
-    <div class="chat-messages" ref="messagesContainer">
+    <div class="chat-messages" ref="messagesContainer" id="messagesContainer">
       <div
         v-for="message in messages"
         :key="message.id"
@@ -69,7 +69,7 @@ const sendMessage = () => {
 
 const scrollToBottom = () => {
   nextTick(() => {
-    const container = messagesContainer.value;
+    const container = document.getElementById("messagesContainer");
     if (container) {
       container.scrollTop = container.scrollHeight;
     }
@@ -79,14 +79,6 @@ const scrollToBottom = () => {
 onMounted(() => {
   scrollToBottom();
 });
-
-const sendFile = () => {
-  console.log("Sending files...");
-};
-
-const sendImage = () => {
-  console.log("Sending photos...");
-};
 </script>
 
 <style scoped>

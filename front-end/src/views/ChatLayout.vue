@@ -15,7 +15,46 @@ const selectedChat = ref(null);
 const selectChat = (chat) => {
   selectedChat.value = chat;
 };
-</script>
+
+let connection;
+
+function connectWebSocket() {
+    connection = new WebSocket("ws://localhost:8080");
+
+    connection.onopen = () => {
+        console.log("WebSocket Client Connected");
+    };
+
+    connection.onerror = (error) => {
+        console.log("Connection Error: " + error);
+    };
+
+    connection.onclose = () => {
+        console.log("Connection Closed");
+    };
+
+    connection.onmessage = (message) => {
+        if (message.data) {
+            const data = JSON.parse(message.data);
+            console.log("Received: '" + data.message + "'");
+        }
+    };
+}
+
+window.onload = () => {
+      connectWebSocket();
+    setTimeout (() => {
+      if (connection && connection.readyState === WebSocket.OPEN) {
+        connection.send(
+            JSON.stringify(
+                "hola que tal"
+            ),
+        );
+        console.log("sms mandado :)");
+    }    }, 5000);
+   
+};
+</script>     
 
 <style scoped>
 .chat-container {
