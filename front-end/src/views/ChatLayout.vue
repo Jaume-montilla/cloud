@@ -1,7 +1,7 @@
 <template>
   <div class="chat-container">
     <ChatList @select-chat="selectChat" />
-    <ChatWindow :selectedChat="selectedChat" />
+    <ChatWindow :selectedChat="selectedChat" :connection="connection" :messages="messages[selectedChat?.id] || []" @send-message="sendMessage" />
   </div>
 </template>
 
@@ -11,50 +11,55 @@ import ChatList from "@/components/ChatList.vue";
 import ChatWindow from "@/components/ChatWindow.vue";
 
 const selectedChat = ref(null);
+const messages = ref({});
+const connection = ref(null);
 
 const selectChat = (chat) => {
   selectedChat.value = chat;
 };
 
-let connection;
+const sendMessage = (message) => {
+  if (selectedChat.value && connection.value && connection.value.readyState === WebSocket.OPEN) {
+    connection.value.send(JSON.stringify({ chatId: selectedChat.value.id, message }));
+    if (!messages.value[selectedChat.value.id]) {
+      messages.value[selectedChat.value.id] = [];
+    }
+    messages.value[selectedChat.value.id].push({ ...message, sender: "user" });
+    console.log("Mensaje enviado:", message);
+  }
+};
 
 function connectWebSocket() {
-    connection = new WebSocket("ws://localhost:8080");
+  connection.value = new WebSocket("ws://localhost:8080");
 
-    connection.onopen = () => {
-        console.log("WebSocket Client Connected");
-    };
+  connection.value.onopen = () => {
+    console.log("WebSocket Client Connected");
+  };
 
-    connection.onerror = (error) => {
-        console.log("Connection Error: " + error);
-    };
+  connection.value.onerror = (error) => {
+    console.log("Connection Error: " + error);
+  };
 
-    connection.onclose = () => {
-        console.log("Connection Closed");
-    };
+  connection.value.onclose = () => {
+    console.log("Connection Closed");
+  };
 
-    connection.onmessage = (message) => {
-        if (message.data) {
-            const data = JSON.parse(message.data);
-            console.log("Received: '" + data.message + "'");
-        }
-    };
+  connection.value.onmessage = (message) => {
+    if (message.data) {
+      const data = JSON.parse(message.data);
+      if (!messages.value[data.chatId]) {
+        messages.value[data.chatId] = [];
+      }
+      messages.value[data.chatId].push({ sender: "other", content: data.message });
+      console.log("Received:", data.message);
+    }
+  };
 }
 
 window.onload = () => {
-      connectWebSocket();
-    setTimeout (() => {
-      if (connection && connection.readyState === WebSocket.OPEN) {
-        connection.send(
-            JSON.stringify(
-                "hola que tal"
-            ),
-        );
-        console.log("sms mandado :)");
-    }    }, 5000);
-   
+  connectWebSocket();
 };
-</script>     
+</script>
 
 <style scoped>
 .chat-container {

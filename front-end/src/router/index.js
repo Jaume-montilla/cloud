@@ -8,6 +8,7 @@ const router = createRouter({
       path: '/chatList',
       name: 'chat',
       component: ChatLayout,
+      props: true
     }
   ],
 })

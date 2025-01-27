@@ -5,18 +5,15 @@
       <span>{{ selectedChat.name }}</span>
     </div>
     <div class="chat-messages" ref="messagesContainer" id="messagesContainer">
-      <div
-        v-for="message in messages"
-        :key="message.id"
-        :class="['message', message.sender === 'user' ? 'sent' : 'received']"
-      >
+      <div v-for="message in messages" :key="message.id"
+        :class="['message', message.sender === 'user' ? 'sent' : 'received']">
         <p>{{ message.content }}</p>
         <span class="timestamp">{{ message.timestamp }}</span>
       </div>
     </div>
     <div class="chat-input">
       <button class="attach-button" @click="toggleMenu">+</button>
-      
+
       <div v-if="showMenu" class="menu-options">
         <button @click="sendFile">Send files</button>
         <button @click="sendImage">Send photos</button>
@@ -33,17 +30,18 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick } from "vue";
+import { ref, onMounted, nextTick, watch } from "vue";
 
-defineProps({
+const props = defineProps({
   selectedChat: Object,
+  messages: Array,
+  connection: Object,
 });
 
-defineEmits(["send-message"]);
+const emit = defineEmits(["send-message"]);
 
 const newMessage = ref("");
-const messages = ref([]);
-const showMenu = ref(false); 
+const showMenu = ref(false);
 
 const toggleMenu = () => {
   showMenu.value = !showMenu.value;
@@ -61,7 +59,7 @@ const sendMessage = () => {
       timestamp,
     };
 
-    messages.value.push(message);
+    emit("send-message", message);
     newMessage.value = "";
     scrollToBottom();
   }
@@ -75,6 +73,23 @@ const scrollToBottom = () => {
     }
   });
 };
+
+watch(() => props.connection, (newConnection) => {
+  if (newConnection) {
+    newConnection.onmessage = (message) => {
+      if (message.data) {
+        const data = JSON.parse(message.data);
+        props.messages.push({
+          id: new Date().getTime(),
+          sender: "other",
+          content: data.message,
+          timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        });
+        scrollToBottom();
+      }
+    };
+  }
+});
 
 onMounted(() => {
   scrollToBottom();
@@ -147,7 +162,7 @@ onMounted(() => {
   align-items: center;
   gap: 10px;
   border-top: 1px solid #ccc;
-  position: relative; 
+  position: relative;
 }
 
 .chat-input input {
@@ -174,7 +189,7 @@ onMounted(() => {
 .attach-button {
   padding: 8px;
   border-radius: 4px;
-  background-color: #007bff; 
+  background-color: #007bff;
   color: white;
   font-size: 1.5rem;
   border: none;
@@ -188,7 +203,7 @@ onMounted(() => {
 
 .menu-options {
   position: absolute;
-  bottom: 50px; 
+  bottom: 50px;
   left: 0;
   background-color: #fff;
   border: 1px solid #ccc;
@@ -197,7 +212,7 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 5px;
-  z-index: 10; 
+  z-index: 10;
 }
 
 .menu-options button {
