@@ -8,3 +8,6 @@ export async function list() {
 	}
 }
 
+export async function saluda() {
+	return 'hola';
+}

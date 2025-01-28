@@ -1,6 +1,20 @@
 <script setup>
-	import list from '../services/ftp.js'
-	let files = list();
+	import { ref, onMounted } from 'vue'
+	import { list, saluda } from '../services/ftp.js'
+	import File from '../components/Files.vue'
+
+	const files = ref([])
+
+	onMounted(async () => {
+
+	list().then((x) => {
+	x.files.forEach(element => {
+		files.value.push(element)	 
+
+	});
+	});
+	}	
+	)
 	console.log(files)
 </script>
 
@@ -30,6 +44,7 @@
 		<section class="files">
 			<p class="archivosSugeridos">Archivos Sugeridos</p>
 			<div class="allFiles">
+				<File v-for="file in files" :key="file" :fileNow="file"/>
 			</div>
 		</section>
 	</main>
