@@ -78,6 +78,7 @@ watch(() => props.connection, (newConnection) => {
   if (newConnection) {
     newConnection.onmessage = (message) => {
       if (message.data) {
+        console.log(message.data);
         const data = JSON.parse(message.data);
         props.messages.push({
           id: new Date().getTime(),
