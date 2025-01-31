@@ -1,5 +1,6 @@
 <script setup>
-import { ref } from 'vue'
+ import { ref } from 'vue'
+import { deleteFile } from '../services/ftp.js'
 const props = defineProps(['fileNow'])
 var n = props.fileNow.split('.')[1];
 console.log(n)
@@ -34,12 +35,18 @@ switch (n) {
     default:
         img.value = new URL('@/assets/other.svg', import.meta.url).href;
         break;
-}
+	}
+
+	const delet= () =>{
+		 if (confirm("Are you sure you wan to delete the file!")){
+		deleteFile(props.fileNow)}
+	}
 </script>
 
 <template>
-  <article class="file" @click="$router.push({ name: 'file', params: {'name': props.fileNow} })">
-    <div>
+  <article class="file" >
+	<p @click="delet">X</p>
+    <div @click="$router.push({ name: 'file', params: {'name': props.fileNow} })">
       <img :src="img" alt="" />
       <h2>{{ props.fileNow }}</h2>
     </div>

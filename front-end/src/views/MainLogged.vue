@@ -1,9 +1,10 @@
 <script setup>
 	import { ref, onMounted } from 'vue'
-	import { list, getFileInfo }from '../services/ftp.js'
+	import { list, getFileInfo, putFile }from '../services/ftp.js'
 	import File from '../components/Files.vue'
 
 	const files = ref([])
+	const emit = defineEmits(['files-dropped'])
 
 	onMounted(async () => {
 
@@ -16,6 +17,25 @@
 	}	
 	)
 	console.log(files)
+	const create = () =>{
+
+		putFile("test.rs", "hola")
+	}
+
+	let active = ref(false)
+
+	function setActive() {
+		active.value = true
+	}
+	function setInactive() {
+		active.value = false
+	}
+
+	function onDrop(e) {
+		setInactive()
+		console.log(e.dataTransfer.files)
+		emit('files-dropped', [...e.dataTransfer.files])
+	}
 </script>
 
 <template>
@@ -43,8 +63,14 @@
 		</section>
 		<section class="files">
 			<p class="archivosSugeridos">Archivos Sugeridos</p>
+			<div :data-active="active" @dragenter.prevent="setActive" @dragover.prevent="setActive" @dragleave.prevent="setInactive" @drop.prevent="onDrop">
+				<p v-if="active">Drop your file here</p>
+				<p v-if="!active">Drag your file here</p>
+				<slot :dropZoneActive="active"></slot>
+			</div>
 			<div class="allFiles">
-				<File v-for="file in files" :key="file" :fileNow="file"/>
+				<button @click="create">Create File</button>
+				<File v-for="file in files" :key="file" :fileNow="file" />
 			</div>
 		</section>
 	</main>
