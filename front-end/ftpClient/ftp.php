@@ -7,7 +7,7 @@ header('Content-Type: application/json');
 $ftp_host = "127.0.0.1";
 $ftp_user = "funcionara";
 $ftp_pass = "password";
-
+$ftp_port = 9876;
 $action = $_GET['action'] ?? null;
 
 ## falta que el user y el pwd se manden con la cookie de sesion
@@ -15,7 +15,7 @@ $action = $_GET['action'] ?? null;
 
 switch ($action) {
     case 'list':
-        $ftp_conn = ftp_connect($ftp_host, 9876) or die(json_encode(["success" => false, "message" => "Unable to connect to FTP server."]));
+        $ftp_conn = ftp_connect($ftp_host, $ftp_port) or die(json_encode(["success" => false, "message" => "Unable to connect to FTP server."]));
         ftp_login($ftp_conn, $ftp_user, $ftp_pass);
 
         $files = ftp_nlist($ftp_conn, "."); 
@@ -27,7 +27,7 @@ switch ($action) {
     case 'upload':
         $file = $_FILES['file'] ?? null;
         if ($file && $file['tmp_name']) {
-            $ftp_conn = ftp_connect($ftp_host) or die(json_encode(["success" => false, "message" => "Unable to connect to FTP server."]));
+            $ftp_conn = ftp_connect($ftp_host, $ftp_port) or die(json_encode(["success" => false, "message" => "Unable to connect to FTP server."]));
             ftp_login($ftp_conn, $ftp_user, $ftp_pass);
 
             $upload = ftp_put($ftp_conn, $file['name'], $file['tmp_name'], FTP_BINARY);
@@ -46,7 +46,7 @@ switch ($action) {
         $file = $post_data['file'] ?? null;
 
         if ($file) {
-            $ftp_conn = ftp_connect($ftp_host) or die(json_encode(["success" => false, "message" => "Unable to connect to FTP server."]));
+            $ftp_conn = ftp_connect($ftp_host, $ftp_port) or die(json_encode(["success" => false, "message" => "Unable to connect to FTP server."]));
             ftp_login($ftp_conn, $ftp_user, $ftp_pass);
 
             $delete = ftp_delete($ftp_conn, $file);
@@ -58,6 +58,36 @@ switch ($action) {
             ]);
         } else {
             echo json_encode(["success" => false, "message" => "No file specified for deletion."]);
+        }
+        break;
+
+		    case 'read':
+        $post_data = json_decode(file_get_contents("php://input"), true);
+        $file = $post_data['file'] ?? null;
+
+        if ($file) {
+            $ftp_conn = ftp_connect($ftp_host, $ftp_port) or die(json_encode(["success" => false, "message" => "Unable to connect to FTP server."]));
+            ftp_login($ftp_conn, $ftp_user, $ftp_pass);
+
+            $temp_file = tempnam(sys_get_temp_dir(), 'ftp_');
+            if (ftp_get($ftp_conn, $temp_file, $file, FTP_BINARY)) {
+                $file_content = file_get_contents($temp_file);
+                unlink($temp_file); 
+                ftp_close($ftp_conn);
+
+                echo json_encode([
+                    "success" => true,
+                    "content" => $file_content
+                ]);
+            } else {
+                ftp_close($ftp_conn);
+                echo json_encode([
+                    "success" => false,
+                    "message" => "Failed to retrieve the file content."
+                ]);
+            }
+        } else {
+            echo json_encode(["success" => false, "message" => "No file specified for reading."]);
         }
         break;
 

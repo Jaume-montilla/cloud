@@ -15,10 +15,16 @@ const router = createRouter({
 			component: () => import('../views/AboutView.vue'),
 		},
 		{
-			path: '/user/:id',
+			path: '/home',
 			name: 'id',
 			props: true,
 			component: () => import('../views/MainLogged.vue'),
+		},
+		{
+			path: '/file/:name',
+			name: 'file',
+			props: true,
+			component: () => import('../views/FileOpened.vue'),
 		},
 	],
 })

@@ -1,6 +1,6 @@
 <script setup>
 	import { ref, onMounted } from 'vue'
-	import { list, saluda } from '../services/ftp.js'
+	import { list, getFileInfo }from '../services/ftp.js'
 	import File from '../components/Files.vue'
 
 	const files = ref([])
@@ -129,4 +129,10 @@ body {
 	font-weight: bold;
 }
 
+.allFiles {
+	display: flex;
+	gap: 2vw;
+	margin-left: 3vw;
+	margin-top: 4vh;
+}
 </style>
