@@ -20,8 +20,9 @@ function connect($user, $pass) {
 
 switch ($action) {
     case 'list':
+        $folder = $_GET['folder'] ?? '';         
 				$ftp_conn = connect($ftp_user, $ftp_pass);
-        $files = ftp_nlist($ftp_conn, "."); 
+        $files = ftp_nlist($ftp_conn, $folder ? $folder : '.');
         ftp_close($ftp_conn);
 
         echo json_encode(["success" => true, "files" => $files]);
@@ -43,6 +44,7 @@ switch ($action) {
             echo json_encode(["success" => false, "message" => "No file uploaded."]);
         }
         break;
+
     case 'delete':
         $post_data = json_decode(file_get_contents("php://input"), true);
         $file = $post_data['file'] ?? null;
@@ -62,7 +64,7 @@ switch ($action) {
         }
         break;
 
-		    case 'read':
+    case 'read':
         $post_data = json_decode(file_get_contents("php://input"), true);
         $file = $post_data['file'] ?? null;
 
@@ -89,7 +91,8 @@ switch ($action) {
             echo json_encode(["success" => false, "message" => "No file specified for reading."]);
         }
         break;
-		  case 'update':
+
+    case 'update':
         $post_data = json_decode(file_get_contents("php://input"), true);
         $file = $post_data['file'] ?? null;  
         $content = $post_data['content'] ?? null;  
@@ -113,7 +116,6 @@ switch ($action) {
             echo json_encode(["success" => false, "message" => "No file or content provided."]);
         }
         break;
-
 
     default:
         echo json_encode(["success" => false, "message" => "Invalid action."]);

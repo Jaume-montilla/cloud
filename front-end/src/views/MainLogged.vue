@@ -1,79 +1,100 @@
 <script setup>
-	import { ref, onMounted } from 'vue'
-	import { list, getFileInfo, putFile }from '../services/ftp.js'
-	import File from '../components/Files.vue'
+import { ref, onMounted } from 'vue'
+import { list, getFileInfo, putFile } from '../services/ftp.js'
+import File from '../components/Files.vue'
 
-	const files = ref([])
-	const emit = defineEmits(['files-dropped'])
+const files = ref([])
+const currentFolder = ref('')  
+const emit = defineEmits(['files-dropped'])
+var path = ""
 
-	onMounted(async () => {
+const loadFiles = async (folder) => {
+  currentFolder.value = folder
+  const response = await list(folder)  
+  files.value = response.files
+}
 
-	list().then((x) => {
-	x.files.forEach(element => {
-		files.value.push(element)	 
+onMounted(async () => {
+  await loadFiles()
+})
 
-	});
-	});
-	}	
-	)
-	console.log(files)
-	const create = () =>{
+const create = (fileName, fileContent) => {
+  putFile(fileName, fileContent).then(() => {
+    loadFiles(currentFolder.value)    })
+}
 
-		putFile("test.rs", "hola")
-	}
+let active = ref(false)
 
-	let active = ref(false)
+function setActive() {
+  active.value = true
+}
 
-	function setActive() {
-		active.value = true
-	}
-	function setInactive() {
-		active.value = false
-	}
+function setInactive() {
+  active.value = false
+}
 
-	function onDrop(e) {
-		setInactive()
-		console.log(e.dataTransfer.files)
-		emit('files-dropped', [...e.dataTransfer.files])
-	}
+function onDrop(e) {
+  setInactive()
+  const droppedFiles = e.dataTransfer.files
+
+  if (droppedFiles.length > 0) {
+    const file = droppedFiles[0]
+
+    const reader = new FileReader()
+    reader.onload = () => {
+      const fileContent = reader.result
+      create(file.name, fileContent)
+    }
+    reader.readAsText(file)
+  }
+
+  emit('files-dropped', [...droppedFiles])
+}
+
+const openFolder = (folderName) => {
+	path += "/"+folderName
+  loadFiles(folderName) }
 </script>
 
 <template>
-	<div class="head">
-		<img src="" alt="logo">
-	</div>
-	<main>
-		<p class="grettering">Welcome back!</p>
-		<section id="management">
-			<div class="typedFilt">
-				<div class="searchBox">
-					<img src="../assets/menu.svg" alt="menu" class="menu">
-					<input placeholder="Hinted search text" class="filter">
-					<img src="../assets/lupa.svg" alt="lupa" class="lupa">
-				</div>
-			</div>
-			<div class="filterCapsule">
-				<div class="preMadeFiltres">
-					<button class="type" id="type"> &#11167;	Tipo</button>
-					<button class="people" id="people"> &#11167;	Personas</button>
-					<button class="modify" id="modify"> &#11167;	Modificado</button>
-					<button class="fuente" id="fuente"> &#11167;	Fuente</button>
-				</div>
-			</div>
-		</section>
-		<section class="files">
-			<p class="archivosSugeridos">Archivos Sugeridos</p>
-			<div :data-active="active" @dragenter.prevent="setActive" @dragover.prevent="setActive" @dragleave.prevent="setInactive" @drop.prevent="onDrop">
-				<p v-if="active">Drop your file here</p>
-				<p v-if="!active">Drag your file here</p>
-				<slot :dropZoneActive="active"></slot>
-			</div>
-			<div class="allFiles">
-				<button @click="create">Create File</button>
-				<File v-for="file in files" :key="file" :fileNow="file" />
-			</div>
-		</section>
-	</main>
+  <div class="head">
+    <img src="" alt="logo">
+  </div>
+  <main>
+    <p class="grettering">Welcome back!</p>
+    <section id="management">
+      <div class="typedFilt">
+        <div class="searchBox">
+          <img src="../assets/menu.svg" alt="menu" class="menu">
+          <input placeholder="Hinted search text" class="filter">
+          <img src="../assets/lupa.svg" alt="lupa" class="lupa">
+        </div>
+      </div>
+      <div class="filterCapsule">
+        <div class="preMadeFiltres">
+          <button class="type" id="type"> &#11167; Tipo</button>
+          <button class="people" id="people"> &#11167; Personas</button>
+          <button class="modify" id="modify"> &#11167; Modificado</button>
+          <button class="fuente" id="fuente"> &#11167; Fuente</button>
+        </div>
+      </div>
+    </section>
+    <section class="files">
+      <p class="archivosSugeridos">Archivos Sugeridos</p>
+      <div :data-active="active" @dragenter.prevent="setActive" @dragover.prevent="setActive" @dragleave.prevent="setInactive" @drop.prevent="onDrop">
+        <p v-if="active">Drop your file here</p>
+        <p v-if="!active">Drag your file here</p>
+        <slot :dropZoneActive="active"></slot>
+      </div>
+      <div class="allFiles">
+        <button @click="create">Create File</button>
+        <div v-for="file in files" :key="file">
+          <File :fileNow="file" />
+          <button @click="openFolder(file)">Abrir Carpeta</button>
+        </div>
+      </div>
+    </section>
+  </main>
 </template>
 
 <style>

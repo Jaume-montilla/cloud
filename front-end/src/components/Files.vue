@@ -1,11 +1,14 @@
 <script setup>
- import { ref } from 'vue'
+import { ref } from 'vue'
 import { deleteFile } from '../services/ftp.js'
-const props = defineProps(['fileNow'])
-var n = props.fileNow.split('.')[1];
-console.log(n)
+
+const props = defineProps(['fileNow', 'path'])
+var fileExtension = props.fileNow.split('.').pop();
+console.log(fileExtension);
+
 let img = ref('');
-switch (n) {
+
+switch (fileExtension) {
     case "rs":
         img.value = new URL('@/assets/rust.svg', import.meta.url).href;
         break;
@@ -29,42 +32,42 @@ switch (n) {
     case "vue":
         img.value = new URL('@/assets/programing.svg', import.meta.url).href;
         break;
-		case undefined:
+    case undefined:
         img.value = new URL('@/assets/folder.svg', import.meta.url).href;
-        break;		
+        break;
     default:
         img.value = new URL('@/assets/other.svg', import.meta.url).href;
         break;
-	}
+}
 
-	const delet= () =>{
-		 if (confirm("Are you sure you wan to delete the file!")){
-		deleteFile(props.fileNow)}
-	}
+const delet = () => {
+    if (confirm("Are you sure you want to delete the file?")) {
+        deleteFile(props.fileNow); 
+    }
+}
 </script>
 
 <template>
-  <article class="file" >
-	<p @click="delet">X</p>
+  <article class="file">
+    <p @click="delet">X</p>
     <div @click="$router.push({ name: 'file', params: {'name': props.fileNow} })">
-      <img :src="img" alt="" />
+      <img :src="img" alt="File Icon" />
       <h2>{{ props.fileNow }}</h2>
     </div>
   </article>
 </template>
 
 <style scoped>
-img{
-	height: 20vw;	
+img {
+  height: 20vw;  
 }
 
 .file {
   border: 1px solid black;
-	cursor: pointer;
+  cursor: pointer;
 }
 
-h2{
-	text-align: center;
+h2 {
+  text-align: center;
 }
 </style>
-

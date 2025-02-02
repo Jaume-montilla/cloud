@@ -1,12 +1,13 @@
-export async function list() {
+export async function list(folder = "") {
 	try {
-		const response = await fetch("http://localhost:8000/ftp.php?action=list");
+		const response = await fetch(`http://localhost:8000/ftp.php?action=list&folder=${folder}`);
 		const data = await response.json();
 		return data;
 	} catch (error) {
 		return { success: false, message: "Failed to fetch files." };
 	}
 }
+
 
 export async function getFileInfo(file) {
 	try {
@@ -89,4 +90,3 @@ export async function putFile(fileName, fileContent) {
 		return { success: false, message: "Error uploading the file." };
 	}
 }
-
