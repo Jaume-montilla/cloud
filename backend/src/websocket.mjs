@@ -1,4 +1,3 @@
-
 import WebSocket from 'ws';
 import { connect } from './mongo_chats.mjs';
 
@@ -14,7 +13,8 @@ wss.on('connection', ws => {
         console.log(`Recibido: ${data}`);
 
         const message = JSON.parse(data);
-        await connect(message.sender, message.receiver, message.content);
+        console.log(message);
+        await connect(message.message.sender, message.message.receiver, message.message.content);
 
         clients.forEach(client => {
             if (client.readyState === WebSocket.OPEN) {
