@@ -24,7 +24,7 @@ const sendMessage = (message) => {
     if (!messages.value[selectedChat.value.id]) {
       messages.value[selectedChat.value.id] = [];
     }
-    messages.value[selectedChat.value.id].push({ ...message, sender: "user" });
+    messages.value[selectedChat.value.id].push({ ...message, sender: "user" , reciver: "other"});
     console.log("Mensaje enviado:", message);
   }
 };
