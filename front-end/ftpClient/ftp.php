@@ -5,8 +5,8 @@ header('Access-Control-Allow-Headers: Content-Type');
 header('Content-Type: application/json');
 
 $ftp_host = "127.0.0.1";
-$ftp_user = "funcionara";
-$ftp_pass = "password";
+$ftp_user = "jaume";
+$ftp_pass = "";
 $ftp_port = 9876;
 $action = $_GET['action'] ?? null;
 

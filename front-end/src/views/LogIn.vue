@@ -1,7 +1,8 @@
 <script setup>
 import { logIn, sign } from "../services/register.js"
 import { ref } from 'vue';
-
+import { useRouter } from 'vue-router';  
+const router = useRouter();  
 
 const user = ref({
     name: "",
@@ -12,7 +13,10 @@ const user = ref({
 const check = (() => {
     console.log(user.value.name)
     logIn(user.value.name, user.value.passwd).then((x) => {
-        console.log(x)
+        console.log(x.message)
+				if (x.message === "Funciona") {
+					router.push({ name: 'id'})
+				}
     })
 
 })
