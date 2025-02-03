@@ -11,7 +11,7 @@ export async function connect(senderU, receiverU, messageU) {
             timestamp: Date
         });
 
-        const Message = mongoose.model('Message', messageSchema);
+        const Message = mongoose.models.Message || mongoose.model('Message', messageSchema);
         var message = new Message({
             sender: senderU,
             receiver: receiverU,
@@ -37,4 +37,30 @@ export async function connect(senderU, receiverU, messageU) {
 
         saveMessage();
     });
+}
+
+export async function getMessages(senderU, receiverU) {
+    let messagesList = [];
+    await mongoose.connect("mongodb://localhost:27017");
+
+    const Schema = mongoose.Schema;
+
+    const messageSchema = new Schema({
+        sender: String,
+        receiver: String,
+        message: String,
+        timestamp: Date
+    });
+
+    const Message = mongoose.models.Message || mongoose.model('Message', messageSchema);
+
+    const sms = await Message.find({
+        $or: [
+            { sender: senderU, receiver: receiverU },
+            { sender: receiverU, receiver: senderU }
+        ]
+    });
+
+    messagesList = sms;
+    return messagesList;
 }

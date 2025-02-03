@@ -1,5 +1,5 @@
 import WebSocket from 'ws';
-import { connect } from './mongo_chats.mjs';
+import { connect, getMessages } from './mongo_chats.mjs';
 
 const wss = new WebSocket.Server({ port: 8080 });
 
@@ -8,6 +8,9 @@ const clients = new Set();
 wss.on('connection', ws => {
     console.log("Nuevo cliente conectado");
     clients.add(ws);
+    getMessages("user", "1").then((x) => {
+        console.log(x);
+    });
 
     ws.on('message', async (data) => {
         console.log(`Recibido: ${data}`);
@@ -25,6 +28,7 @@ wss.on('connection', ws => {
 
     ws.on('close', () => {
         clients.delete(ws);
+        console.log("Cliente desconectado");
     });
 });
 

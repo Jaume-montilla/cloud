@@ -38,6 +38,7 @@ const props = defineProps({
   connection: Object,
 });
 
+
 const emit = defineEmits(["send-message"]);
 
 const newMessage = ref("");
@@ -55,7 +56,7 @@ const sendMessage = () => {
     const message = {
       id: now.getTime(),
       sender: "user",
-      receiver: "other",
+      receiver: props.selectedChat.id,
       content: newMessage.value.trim(),
       timestamp,
     };
