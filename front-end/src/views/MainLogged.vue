@@ -87,7 +87,6 @@ const openFolder = (folderName) => {
         <slot :dropZoneActive="active"></slot>
       </div>
       <div class="allFiles">
-        <button @click="create">Create File</button>
         <div v-for="file in files" :key="file">
           <File :fileNow="file" />
           <button @click="openFolder(file)">Abrir Carpeta</button>

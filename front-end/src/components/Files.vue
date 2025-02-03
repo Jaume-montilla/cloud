@@ -1,13 +1,15 @@
 <script setup>
 import { ref } from 'vue'
 import { deleteFile } from '../services/ftp.js'
+import { defineEmits } from "vue";
+const emit = defineEmits(["folder"]);
 
 const props = defineProps(['fileNow', 'path'])
-var fileExtension = props.fileNow.split('.').pop();
-console.log(fileExtension);
+var fileExtension = props.fileNow.split('.')[1];
+console.log(props.fileNow.split('.')[1]);
 
 let img = ref('');
-
+var folder = false
 switch (fileExtension) {
     case "rs":
         img.value = new URL('@/assets/rust.svg', import.meta.url).href;
@@ -34,6 +36,8 @@ switch (fileExtension) {
         break;
     case undefined:
         img.value = new URL('@/assets/folder.svg', import.meta.url).href;
+				folder = true
+				emit ("folder")
         break;
     default:
         img.value = new URL('@/assets/other.svg', import.meta.url).href;
