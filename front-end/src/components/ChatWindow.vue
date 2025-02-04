@@ -6,7 +6,7 @@
     </div>
     <div class="chat-messages" ref="messagesContainer" id="messagesContainer">
       <div v-for="message in messages" :key="message.id"
-        :class="['message', message.sender === 'user' ? 'sent' : 'received']">
+        :class="['message', message.receiver == props.selectedChat.id ? 'sent' : 'received']">
         <p>{{ message.content }}</p>
         <span class="timestamp">{{ message.timestamp }}</span>
       </div>
@@ -31,13 +31,13 @@
 
 <script setup>
 import { ref, onMounted, nextTick, watch } from "vue";
-
 const props = defineProps({
   selectedChat: Object,
   messages: Array,
   connection: Object,
 });
 
+const messages = ref([]);
 
 const emit = defineEmits(["send-message"]);
 
@@ -76,21 +76,36 @@ const scrollToBottom = () => {
   });
 };
 
+var msgSended = []
+var msgReceived = []
 watch(() => props.connection, (newConnection) => {
   if (newConnection) {
     newConnection.onmessage = (message) => {
+      messages.value = [];
       if (message.data) {
-        console.log(message.data);
         const data = JSON.parse(message.data);
-        props.messages.push({
-          id: new Date().getTime(),
-          sender: "other",
-          receiver: "user",
-          content: data.message,
-          timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        data.forEach(sms => {
+          if (sms.receiver == props.selectedChat.id) {
+            console.log(sms.receiver); 
+            msgSended.push(sms);
+
+            scrollToBottom();
+          }
+          else{
+            msgReceived.push(sms);
+          }
+          messages.value.push({
+  id: new Date().getTime(),
+  sender: sms.sender,
+  receiver: sms.receiver,
+  content: sms.message,
+  timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+});
         });
+        console.log(msgReceived)
+        console.log(msgSended)         
+        }
         scrollToBottom();
-      }
     };
   }
 });

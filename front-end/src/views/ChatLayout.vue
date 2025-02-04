@@ -1,6 +1,6 @@
 <template>
   <div class="chat-container">
-    <ChatList @select-chat="selectChat" />
+  <ChatList @click=connectWebSocket @select-chat="selectChat" />
     <ChatWindow :selectedChat="selectedChat" :connection="connection" :messages="messages[selectedChat?.id] || []" @send-message="sendMessage" />
   </div>
 </template>
@@ -30,7 +30,13 @@ const sendMessage = (message) => {
 };
 
 function connectWebSocket() {
-  connection.value = new WebSocket("ws://localhost:8080");
+  if (!selectedChat.value) {
+    return;
+  }
+  // cambiar el mycustomID por el id del usuario logueado y que se pase como prop a todas las paginas que lo use :) okey
+  const myCustomID = "user";
+  const clientId = String(selectedChat.value.id);
+  connection.value = new WebSocket(`ws://localhost:8080/?myCustomID=${myCustomID}&connectionID=${clientId}`);
 
   connection.value.onopen = () => {
     console.log("WebSocket Client Connected");
@@ -38,22 +44,22 @@ function connectWebSocket() {
 
   connection.value.onerror = (error) => {
     console.log("Connection Error: " + error);
-  };
+  };  
 
   connection.value.onclose = () => {
     console.log("Connection Closed");
   };
 
-  connection.value.onmessage = (message) => {
-    if (message.data) {
-      const data = JSON.parse(message.data);
-      if (!messages.value[data.chatId]) {
-        messages.value[data.chatId] = [];
-      }
-      messages.value[data.chatId].push({ sender: "other", content: data.message });
-      console.log("Received:", data.message);
-    }
-  };
+  // connection.value.onmessage = (message) => {
+  //   if (message.data) {
+  //     const data = JSON.parse(message.data);
+  //     if (!messages.value[data.chatId]) {
+  //       messages.value[data.chatId] = [];
+  //     }
+  //     messages.value[data.chatId].push({ sender: "other", content: data.message });
+  //     console.log("Received:", data.message);
+  //   }
+  // };
 }
 
 window.onload = () => {
