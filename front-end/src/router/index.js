@@ -25,6 +25,12 @@ const router = createRouter({
 			props: true,
 			component: () => import('../views/FileOpened.vue'),
 		},
+		{
+			path: '/chat',
+			name: 'chat',
+			props: true,
+			component: () => import('../views/ChatLayout.vue')
+		},
 	],
 })
 

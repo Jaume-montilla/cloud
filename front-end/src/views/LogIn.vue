@@ -2,6 +2,7 @@
 import { logIn, sign } from "../services/register.js"
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';  
+import { log } from '../services/ftp.js'
 const router = useRouter();  
 
 const user = ref({
@@ -15,7 +16,10 @@ const check = (() => {
     logIn(user.value.name, user.value.passwd).then((x) => {
         console.log(x.message)
 				if (x.message === "Funciona") {
-					router.push({ name: 'id'})
+					log(user.value.name).then((x) => {
+						console.log(x)
+					})
+					//router.push({ name: 'id'})
 				}
     })
 

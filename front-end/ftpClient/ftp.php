@@ -5,24 +5,32 @@ header('Access-Control-Allow-Headers: Content-Type');
 header('Content-Type: application/json');
 
 $ftp_host = "127.0.0.1";
-$ftp_user = "jaume";
+$ftp_user = "";
 $ftp_pass = "";
 $ftp_port = 9876;
 $action = $_GET['action'] ?? null;
 
 ## falta que el user y el pwd se manden con la cookie de sesion
 
-function connect($user, $pass) {
+function connect($user) {
 	$ftp_conn = ftp_connect("127.0.0.1", 9876) or die(json_encode(["success" => false, "message" => "Unable to connect to FTP server."]));
-	ftp_login($ftp_conn, $user, $pass);
+	ftp_login($ftp_conn, $user, "");
 	return $ftp_conn;
 };
 
 switch ($action) {
+	case 'log':
+		$ftp_user = $_GET['user'] ?? '';
+		$ftp_conn = connect($ftp_user, $ftp_pass);
+		echo json_encode(["success" => $ftp_user]);
+
+		break;
     case 'list':
         $folder = $_GET['folder'] ?? '';         
+				$ftp_user = $_GET['user'] ?? '';
 				$ftp_conn = connect($ftp_user, $ftp_pass);
-        $files = ftp_nlist($ftp_conn, $folder ? $folder : '.');
+				$files = ftp_nlist($ftp_conn, $folder ? $folder : '.');
+				echo $ftp_user;
         ftp_close($ftp_conn);
 
         echo json_encode(["success" => true, "files" => $files]);
@@ -30,6 +38,7 @@ switch ($action) {
 
     case 'upload':
         $file = $_FILES['file'] ?? null;
+				$ftp_user = $_GET['user'] ?? '';
         if ($file && $file['tmp_name']) {
 						$ftp_conn = connect($ftp_user, $ftp_pass);
 
@@ -48,6 +57,7 @@ switch ($action) {
     case 'delete':
         $post_data = json_decode(file_get_contents("php://input"), true);
         $file = $post_data['file'] ?? null;
+				$ftp_user = $_GET['user'] ?? '';
 
         if ($file) {
 						$ftp_conn = connect($ftp_user, $ftp_pass);
@@ -67,6 +77,7 @@ switch ($action) {
     case 'read':
         $post_data = json_decode(file_get_contents("php://input"), true);
         $file = $post_data['file'] ?? null;
+				$ftp_user = $_GET['user'] ?? '';
 
         if ($file) {
 						$ftp_conn = connect($ftp_user, $ftp_pass);
@@ -96,6 +107,7 @@ switch ($action) {
         $post_data = json_decode(file_get_contents("php://input"), true);
         $file = $post_data['file'] ?? null;  
         $content = $post_data['content'] ?? null;  
+				$ftp_user = $_GET['user'] ?? '';
 
         if ($file && $content) {
             $temp_file = tempnam(sys_get_temp_dir(), 'ftp_');

@@ -1,6 +1,6 @@
 <script setup>
-import { ref, onMounted } from 'vue'
-import { list, getFileInfo, putFile } from '../services/ftp.js'
+import { ref, onMounted, onBeforeMount } from 'vue'
+import { list, getFileInfo, putFile, log } from '../services/ftp.js'
 import File from '../components/Files.vue'
 
 const files = ref([])
@@ -13,6 +13,10 @@ const loadFiles = async (folder) => {
   const response = await list(folder)  
   files.value = response.files
 }
+
+onBeforeMount(async () => {
+	await log()
+})
 
 onMounted(async () => {
   await loadFiles()
