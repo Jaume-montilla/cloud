@@ -56,12 +56,17 @@ function startFtpServer(username) {
 		connection.on('command:pass', function (pass, success, failure) {
 			success(username)
 		})
+
+		connection.on('command:quit', function () {
+			console.log("chao")
+		})
 	})
 
 
 	server.debugging = 4;
 	server.listen(options.port);
 	console.log('FTP Server listening on port ' + options.port);
+	return
 }
 
 export default startFtpServer;

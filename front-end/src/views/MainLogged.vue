@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, onBeforeMount } from 'vue'
-import { list, getFileInfo, putFile, log } from '../services/ftp.js'
+import { list, getFileInfo, putFile} from '../services/ftp.js'
 import File from '../components/Files.vue'
 
 const files = ref([])
@@ -10,12 +10,28 @@ var path = ""
 
 const loadFiles = async (folder) => {
   currentFolder.value = folder
-  const response = await list(folder)  
+  const response = await list(folder, name) 
   files.value = response.files
 }
 
+function getCookie(cname) {
+  let name = cname + "=";
+  let decodedCookie = decodeURIComponent(document.cookie);
+  let ca = decodedCookie.split(';');
+  for(let i = 0; i <ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return "";
+}
+var name = ""
 onBeforeMount(async () => {
-	await log()
+	name = getCookie("username")
 })
 
 onMounted(async () => {
@@ -23,7 +39,7 @@ onMounted(async () => {
 })
 
 const create = (fileName, fileContent) => {
-  putFile(fileName, fileContent).then(() => {
+  putFile(fileName, fileContent, name).then(() => {
     loadFiles(currentFolder.value)    })
 }
 

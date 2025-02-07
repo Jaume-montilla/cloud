@@ -12,10 +12,11 @@ $action = $_GET['action'] ?? null;
 
 ## falta que el user y el pwd se manden con la cookie de sesion
 
+$ftp_conn = ftp_connect("127.0.0.1", 9876) or die(json_encode(["success" => false, "message" => "Unable to connect to FTP server."]));
+
 function connect($user) {
-	$ftp_conn = ftp_connect("127.0.0.1", 9876) or die(json_encode(["success" => false, "message" => "Unable to connect to FTP server."]));
-	ftp_login($ftp_conn, $user, "");
-	return $ftp_conn;
+	ftp_login($GLOBALS["ftp_conn"], $user, "");
+	return $GLOBALS["ftp_conn"];
 };
 
 switch ($action) {
@@ -30,7 +31,6 @@ switch ($action) {
 				$ftp_user = $_GET['user'] ?? '';
 				$ftp_conn = connect($ftp_user, $ftp_pass);
 				$files = ftp_nlist($ftp_conn, $folder ? $folder : '.');
-				echo $ftp_user;
         ftp_close($ftp_conn);
 
         echo json_encode(["success" => true, "files" => $files]);

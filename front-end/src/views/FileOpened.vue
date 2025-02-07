@@ -6,8 +6,26 @@
 	const info = ref([])
 	var infoOgValue = "";
 
+function getCookie(cname) {
+  let name = cname + "=";
+  let decodedCookie = decodeURIComponent(document.cookie);
+  let ca = decodedCookie.split(';');
+  for(let i = 0; i <ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return "";
+}
+var name = ""
+
 	onBeforeMount(() => {
-getFileInfo(props.name).then(x => {
+	name = getCookie("username")
+getFileInfo(props.name, name).then(x => {
 	info.value.push(x['content'])
 	infoOgValue =	info.value
 		})
@@ -16,7 +34,7 @@ getFileInfo(props.name).then(x => {
 const save = () => {
 if (info.value != infoOgValue) {
 	infoOgValue = info.value
-	updateFile(props.name, infoOgValue).then(x => {
+	updateFile(props.name, infoOgValue, name).then(x => {
 		console.log(x)
 	})
 	console.log(info.value)

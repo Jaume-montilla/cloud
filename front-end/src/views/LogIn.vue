@@ -16,14 +16,17 @@ const check = (() => {
     logIn(user.value.name, user.value.passwd).then((x) => {
         console.log(x.message)
 				if (x.message === "Funciona") {
+				document.cookie
+				document.cookie = "username="+user.value.name+"; expires=Thu, 18 Dec 2026 12:00:00 UTC";
 					log(user.value.name).then((x) => {
 						console.log(x)
 					})
-					//router.push({ name: 'id'})
+					router.push({ name: 'id'})
 				}
     })
 
 })
+
 
 </script>
 
