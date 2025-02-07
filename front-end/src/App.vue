@@ -1,14 +1,11 @@
+<script setup>
+</script>
+
 <template>
-  <ChatLayout />
+  <RouterView />
 </template>
 
-<script>
-import ChatLayout from "@/views/ChatLayout.vue";
+<style scoped>
 
-export default {
-  name: "App",
-  components: {
-    ChatLayout,
-  },
-};
-</script>
+
+</style>
