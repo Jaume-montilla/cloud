@@ -19,10 +19,10 @@ const httpServer = http.createServer((req, res) => {
 		req.on("end", () => {
 			try {
 				const parsedData = JSON.parse(body);
-				const { name, password, accion } = parsedData;
+				const { name, password, email, accion } = parsedData;
 
 				if (accion === "create") {
-					saveUser(name, password)
+					saveUser(name, password, email)
 						.then((result) => {
 							console.log(result);
 							res.writeHead(200, { "Content-Type": "application/json" });

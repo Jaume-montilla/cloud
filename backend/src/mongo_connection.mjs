@@ -1,6 +1,6 @@
 // connectar a mongo
 import mongoose from "mongoose";
-export async function saveUser(user, passwd, email) {
+export async function saveUser(user, passwd, emailU) {
 	const url = "mongodb://localhost:27017";
 	mongoose
 		.connect(url)
@@ -20,7 +20,7 @@ export async function saveUser(user, passwd, email) {
 			const nuevaPersona = new User({
 				name: user,
 				psswd: passwd,
-				email: email,
+				email: emailU,
 			});
 			nuevaPersona.save();
 		})
