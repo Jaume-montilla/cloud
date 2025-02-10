@@ -16,6 +16,9 @@ function startFtpServer(username) {
 			return './';
 		},
 		getRoot: function () {
+			if (username == "admin") {
+				return baseDir;
+			}
 			return path.join(baseDir, username);
 		},
 		pasvPortRangeStart: 1025,

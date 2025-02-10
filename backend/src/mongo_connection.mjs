@@ -44,14 +44,11 @@ export async function checkUser(user, passwd) {
 		const User = mongoose.models.User || mongoose.model("User", usrSchema);
 
 		const foundUser = await User.findOne({ name: user });
-		if (!foundUser) {
-			return "usr failed";
-		}
 
-		if (foundUser.psswd !== passwd) {
-			return "Contraseña incorrecta";
+		if (foundUser.psswd == passwd) {
+			return "Inicio de sesión exitoso";
 		}
-		return "Inicio de sesión exitoso";
+		return "Email o contraseña incorrecta";
 	} catch (err) {
 		console.error("Error en checkUser:", err);
 		return err;

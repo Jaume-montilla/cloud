@@ -1,7 +1,7 @@
 import http from "http";
 import { saveUser, checkUser } from "./mongo_connection.mjs";
 import startFtpServer from "./ftp.mjs";
-import kill from "kill-port"; 
+import kill from "kill-port";
 
 
 const httpServer = http.createServer((req, res) => {
@@ -43,7 +43,7 @@ const httpServer = http.createServer((req, res) => {
 							console.log(result);
 
 							if (result === "Inicio de sesión exitoso") {
-								kill(9876)
+								// kill(9876)
 								res.writeHead(200, { "Content-Type": "application/json" });
 								res.end(JSON.stringify({ message: "Funciona" }));
 								startFtpServer(name);

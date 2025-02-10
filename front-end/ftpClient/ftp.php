@@ -8,7 +8,7 @@ $ftp_host = "127.0.0.1";
 $ftp_user = "";
 $ftp_pass = "";
 $ftp_port = 9876;
-$action = $_GET['action'] ?? null;
+$action = $_GET['action'] ;
 
 ## falta que el user y el pwd se manden con la cookie de sesion
 

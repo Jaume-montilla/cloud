@@ -33,10 +33,7 @@ function getCookie(cname) {
   }
   return "";
 }
-var name = ""
-onBeforeMount(async () => {
-	name = getCookie("username")
-})
+
 
 const sendMessage = (message) => {
   if (selectedChat.value && connection.value && connection.value.readyState === WebSocket.OPEN) {
@@ -44,7 +41,7 @@ const sendMessage = (message) => {
     if (!messages.value[selectedChat.value.id]) {
       messages.value[selectedChat.value.id] = [];
     }
-    messages.value[selectedChat.value.id].push({ ...message, sender: "user" , receiver: "other"});
+    messages.value[selectedChat.value.id].push({ ...message, sender: getCookie("username") , receiver: "other"});
     console.log("Mensaje enviado:", message);
   }
 };

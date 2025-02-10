@@ -36,6 +36,21 @@ const props = defineProps({
   messages: Array,
   connection: Object,
 });
+function getCookie(cname) {
+  let name = cname + "=";
+  let decodedCookie = decodeURIComponent(document.cookie);
+  let ca = decodedCookie.split(';');
+  for(let i = 0; i <ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return "";
+}
 
 const messages = ref([]);
 
@@ -55,7 +70,7 @@ const sendMessage = () => {
 
     const message = {
       id: now.getTime(),
-      sender: "user",
+      sender:getCookie("username"),
       receiver: props.selectedChat.id,
       content: newMessage.value.trim(),
       timestamp,
