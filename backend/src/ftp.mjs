@@ -16,6 +16,9 @@ function startFtpServer(username) {
 			return './';
 		},
 		getRoot: function () {
+			if (username == "admin") {
+				return baseDir;
+			}
 			return path.join(baseDir, username);
 		},
 		pasvPortRangeStart: 1025,
@@ -44,7 +47,6 @@ function startFtpServer(username) {
 			fs.mkdirSync(userDir, { recursive: true });
 		});
 
-
 		connection.on('command:user', function (user, success, failure) {
 			if (user == username) {
 				success()
@@ -57,8 +59,10 @@ function startFtpServer(username) {
 			success(username)
 		})
 
+		// Aquí manejamos el comando quit
 		connection.on('command:quit', function () {
-			console.log("chao")
+			console.log("Cliente ha cerrado la conexión. Cerrando servidor...");
+			server.close();  // Detenemos el servidor FTP
 		})
 	})
 
@@ -66,7 +70,7 @@ function startFtpServer(username) {
 	server.debugging = 4;
 	server.listen(options.port);
 	console.log('FTP Server listening on port ' + options.port);
-	return
+	return server;  // Devolvemos el objeto server para poder cerrarlo desde otro lugar
 }
 
 export default startFtpServer;

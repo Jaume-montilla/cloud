@@ -15,7 +15,7 @@ const check = (() => {
     console.log(user.value.name)
     logIn(user.value.name, user.value.passwd).then((x) => {
         console.log(x.message)
-				if (x.message === "Funciona") {
+				if (x.message === "Conexión FTP exitosa") {
 				document.cookie
 				document.cookie = "username="+user.value.name+"; expires=Thu, 18 Dec 2026 12:00:00 UTC";
 					log(user.value.name).then((x) => {

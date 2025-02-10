@@ -1,5 +1,7 @@
 // connectar a mongo
 import mongoose from "mongoose";
+import { nanoid } from "nanoid";
+
 export async function saveUser(user, passwd, email) {
 	const url = "mongodb://localhost:27017";
 	mongoose
@@ -13,14 +15,17 @@ export async function saveUser(user, passwd, email) {
 				name: String,
 				psswd: String,
 				email: String,
+				uuid: String,
 			});
 
 			const User = mongoose.models.User || mongoose.model("User", usrSchema);
 
+			const id = nanoid();
 			const nuevaPersona = new User({
 				name: user,
 				psswd: passwd,
 				email: email,
+				uuid: id,
 			});
 			nuevaPersona.save();
 		})

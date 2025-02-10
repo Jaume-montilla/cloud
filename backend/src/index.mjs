@@ -1,10 +1,27 @@
 import http from "http";
 import { saveUser, checkUser } from "./mongo_connection.mjs";
 import startFtpServer from "./ftp.mjs";
-import kill from "kill-port"; 
+import kill from "kill-port";
+import net from 'net';  // Importar el módulo net usando 'import'
 
+// Función para verificar si el puerto está libre
+function isPortFree(port) {
+	return new Promise((resolve, reject) => {
+		const server = net.createServer()
+			.once('error', (err) => {
+				if (err.code === 'EADDRINUSE') {
+					reject(new Error('Puerto en uso'));
+				}
+			})
+			.once('listening', () => {
+				server.close();
+				resolve();
+			})
+			.listen(port);
+	});
+}
 
-const httpServer = http.createServer((req, res) => {
+const httpServer = http.createServer(async (req, res) => {
 	res.setHeader("Access-Control-Allow-Origin", "*");
 	res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
 	res.setHeader("Access-Control-Allow-Headers", "Content-Type");
@@ -16,7 +33,7 @@ const httpServer = http.createServer((req, res) => {
 			body += chunk.toString();
 		});
 
-		req.on("end", () => {
+		req.on("end", async () => {
 			try {
 				const parsedData = JSON.parse(body);
 				const { name, password, accion } = parsedData;
@@ -39,14 +56,30 @@ const httpServer = http.createServer((req, res) => {
 						});
 				} else if (accion === "check") {
 					checkUser(name, password)
-						.then((result) => {
+						.then(async (result) => {
 							console.log(result);
 
 							if (result === "Inicio de sesión exitoso") {
-								kill(9876)
-								res.writeHead(200, { "Content-Type": "application/json" });
-								res.end(JSON.stringify({ message: "Funciona" }));
-								startFtpServer(name);
+								try {
+									// Liberar el puerto 9876 si está ocupado
+									await kill(9876);
+									console.log("Puerto 9876 liberado");
+
+									// Esperar a que el puerto esté libre
+									await isPortFree(9876);
+									console.log("El puerto 9876 está libre.");
+
+									// Iniciar el servidor FTP después de liberar el puerto
+									setTimeout(() => {
+										startFtpServer(name);
+										res.writeHead(200, { "Content-Type": "application/json" });
+										res.end(JSON.stringify({ message: "Conexión FTP exitosa" }));
+									}, 1000);
+								} catch (error) {
+									console.error("Error al liberar el puerto o iniciar el servidor FTP:", error);
+									res.writeHead(500, { "Content-Type": "application/json" });
+									res.end(JSON.stringify({ message: "Error al liberar el puerto o iniciar el servidor FTP" }));
+								}
 							} else {
 								res.writeHead(400, { "Content-Type": "application/json" });
 								res.end(JSON.stringify({ message: "Usuario o contraseña incorrectos" }));
