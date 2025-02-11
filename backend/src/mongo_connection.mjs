@@ -7,7 +7,6 @@ export async function saveUser(user, passwd, email) {
 	mongoose
 		.connect(url)
 		.then(() => {
-			//crear un esquema
 			const Schema = mongoose.Schema;
 
 			// cuando tengamos el ok crear estructura

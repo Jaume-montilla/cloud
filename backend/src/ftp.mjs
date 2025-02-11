@@ -4,10 +4,10 @@ import path from 'path'
 
 const baseDir = path.join('./', '..', 'users');
 
-function startFtpServer(username) {
+function startFtpServer(username, port) {
 	const options = {
 		host: '127.0.0.1',
-		port: 9876,
+		port: port,
 		tls: null,
 	};
 

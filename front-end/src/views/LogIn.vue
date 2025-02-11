@@ -15,13 +15,11 @@ const check = (() => {
     console.log(user.value.name)
     logIn(user.value.name, user.value.passwd).then((x) => {
         console.log(x.message)
-				if (x.message === "Conexión FTP exitosa") {
-				document.cookie
+				if (x.message === "Funciona") {
+
 				document.cookie = "username="+user.value.name+"; expires=Thu, 18 Dec 2026 12:00:00 UTC";
-					log(user.value.name).then((x) => {
-						console.log(x)
-					})
-					router.push({ name: 'id'})
+				//document.cookie = "port="++"; expires=Thu, 18 Dec 2026 12:00:00 UTC";
+						router.push({ name: 'id'})
 				}
     })
 

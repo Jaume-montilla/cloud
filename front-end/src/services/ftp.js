@@ -1,6 +1,6 @@
-export async function list(folder = "", usuari) {
+export async function list(folder = "", usuari, port) {
 	try {
-		const response = await fetch(`http://localhost:8000/ftp.php?action=list&folder=${folder}&user=${usuari}`);
+		const response = await fetch(`http://localhost:8000/ftp.php?action=list&folder=${folder}&user=${usuari}&port=${port}`);
 		const data = await response.json();
 		return data;
 	} catch (error) {
@@ -9,19 +9,12 @@ export async function list(folder = "", usuari) {
 }
 
 export async function log(usuari = "") {
-	/*try {
-		const response = await fetch(`http://localhost:8000/ftp.php?action=log&user=${usuari}`);
-		return data;
-		const data = await response.json();
-	} catch (error) {
-		return { success: false, message: "Failed to fetch files." };
-	}*/
 	return usuari
 }
 
-export async function getFileInfo(file, usuari) {
+export async function getFileInfo(file, usuari, port) {
 	try {
-		const response = await fetch(`http://localhost:8000/ftp.php?action=read&user=${usuari}`, {
+		const response = await fetch(`http://localhost:8000/ftp.php?action=read&user=${usuari}&port=${port}`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -35,13 +28,13 @@ export async function getFileInfo(file, usuari) {
 	}
 }
 
-export async function updateFile(fileName, newContent, usuari) {
+export async function updateFile(fileName, newContent, usuari, port) {
 	try {
 		const data = {
 			file: fileName,
 			content: newContent,
 		};
-		const response = await fetch(`http://localhost:8000/ftp.php?action=update&user=${usuari}`, {
+		const response = await fetch(`http://localhost:8000/ftp.php?action=update&user=${usuari}&port=${port}`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -57,12 +50,12 @@ export async function updateFile(fileName, newContent, usuari) {
 	}
 }
 
-export async function deleteFile(fileName, usuari) {
+export async function deleteFile(fileName, usuari, port) {
 	try {
 		const data = {
 			file: fileName,
 		};
-		const response = await fetch(`http://localhost:8000/ftp.php?action=delete&user=${usuari}`, {
+		const response = await fetch(`http://localhost:8000/ftp.php?action=delete&user=${usuari}&port=${port}`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -78,13 +71,13 @@ export async function deleteFile(fileName, usuari) {
 	}
 }
 
-export async function putFile(fileName, fileContent, usuari) {
+export async function putFile(fileName, fileContent, usuari, port) {
 	try {
 		const data = {
 			file: fileName,
 			content: fileContent,
 		};
-		const response = await fetch(`http://localhost:8000/ftp.php?action=update&user=${usuari}`, {
+		const response = await fetch(`http://localhost:8000/ftp.php?action=update&user=${usuari}&port=${port}`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",

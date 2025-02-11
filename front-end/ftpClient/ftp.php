@@ -7,12 +7,12 @@ header('Content-Type: application/json');
 $ftp_host = "127.0.0.1";
 $ftp_user = "";
 $ftp_pass = "";
-$ftp_port = 9876;
+$ftp_port = 0;
 $action = $_GET['action'] ?? null;
 
 ## falta que el user y el pwd se manden con la cookie de sesion
 
-$ftp_conn = ftp_connect("127.0.0.1", 9876) or die(json_encode(["success" => false, "message" => "Unable to connect to FTP server."]));
+$ftp_conn = ftp_connect("127.0.0.1", $ftp_port) or die(json_encode(["success" => false, "message" => "Unable to connect to FTP server."]));
 
 function connect($user) {
 	ftp_login($GLOBALS["ftp_conn"], $user, "");
@@ -22,6 +22,7 @@ function connect($user) {
 switch ($action) {
 	case 'log':
 		$ftp_user = $_GET['user'] ?? '';
+		$ftp_user = $_GET['user'] ?? '';
 		$ftp_conn = connect($ftp_user, $ftp_pass);
 		echo json_encode(["success" => $ftp_user]);
 
@@ -29,6 +30,7 @@ switch ($action) {
     case 'list':
         $folder = $_GET['folder'] ?? '';         
 				$ftp_user = $_GET['user'] ?? '';
+				$ftp_port= $_GET['port'] ?? '';
 				$ftp_conn = connect($ftp_user, $ftp_pass);
 				$files = ftp_nlist($ftp_conn, $folder ? $folder : '.');
         ftp_close($ftp_conn);
