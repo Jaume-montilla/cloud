@@ -55,7 +55,7 @@ export async function checkUser(user, passwd) {
 		if (foundUser.psswd !== passwd) {
 			return "Contraseña incorrecta";
 		}
-		return "Inicio de sesión exitoso";
+		return "Inicio de sesión exitoso;" + foundUser._id;
 	} catch (err) {
 		console.error("Error en checkUser:", err);
 		return err;

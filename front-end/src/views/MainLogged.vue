@@ -10,7 +10,7 @@ var path = ""
 
 const loadFiles = async (folder) => {
   currentFolder.value = folder
-  const response = await list(folder, name) 
+  const response = await list(folder, name, port) 
   files.value = response.files
 }
 
@@ -30,16 +30,18 @@ function getCookie(cname) {
   return "";
 }
 var name = ""
+var port = ""
 onBeforeMount(async () => {
 	name = getCookie("username")
+	port = getCookie("port")
 })
 
 onMounted(async () => {
   await loadFiles()
 })
 
-const create = (fileName, fileContent) => {
-  putFile(fileName, fileContent, name).then(() => {
+const create = (fileName, fileContent = "File created!!") => {
+  putFile(fileName, fileContent, name, port).then(() => {
     loadFiles(currentFolder.value)    })
 }
 
@@ -79,6 +81,7 @@ const openFolder = (folderName) => {
 <template>
   <div class="head">
     <img src="" alt="logo">
+		<p @click="$router.push({ name: 'chat'})">Chats</p>
   </div>
   <main>
     <p class="grettering">Welcome back!</p>

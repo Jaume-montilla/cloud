@@ -1,33 +1,14 @@
 import http from "http";
 import { saveUser, checkUser } from "./mongo_connection.mjs";
 import startFtpServer from "./ftp.mjs";
-import detectPort, { detect } from 'detect-port';
-
-function decectPort() {
-	let port = getRandomInt()
-	detect(port)
-		.then(realPort => {
-			if (port == realPort) {
-				return true;
-			} else {
-				return false
-			}
-		})
-		.catch(err => {
-			console.log(err);
-		});
-}
-
-function getRandomInt(max = 10000) {
-	return Math.floor(Math.random() * max);
-}
-
+import detectPort from "detect-port";
+import webS from "./websocket.mjs";
+webS()
 
 const httpServer = http.createServer((req, res) => {
 	res.setHeader("Access-Control-Allow-Origin", "*");
 	res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
 	res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-
 	if (req.method === "POST" && req.url === "/") {
 		let body = "";
 
@@ -35,7 +16,7 @@ const httpServer = http.createServer((req, res) => {
 			body += chunk.toString();
 		});
 
-		req.on("end", () => {
+		req.on("end", async () => {
 			try {
 				const parsedData = JSON.parse(body);
 				const { name, password, email, accion } = parsedData;
@@ -45,32 +26,30 @@ const httpServer = http.createServer((req, res) => {
 						.then((result) => {
 							console.log(result);
 							res.writeHead(200, { "Content-Type": "application/json" });
-							res.end(
-								JSON.stringify({ message: "Usuario creado exitosamente" })
-							);
+							res.end(JSON.stringify({ message: "Usuario creado exitosamente" }));
 						})
 						.catch((err) => {
 							console.error("Error al guardar el usuario:", err);
 							res.writeHead(500, { "Content-Type": "application/json" });
-							res.end(
-								JSON.stringify({ message: "Error interno del servidor" })
-							);
+							res.end(JSON.stringify({ message: "Error interno del servidor" }));
 						});
 				} else if (accion === "check") {
 					checkUser(name, password)
 						.then(async (result) => {
 							console.log(result);
+							const [allow, uid] = result.split(";");
+							if (allow === "Inicio de sesión exitoso") {
+								let ftpPort;
 
-							if (result === "Inicio de sesión exitoso") {
-								decectPort(9876)
-								res.writeHead(200, { "Content-Type": "application/json" });
-								res.end(JSON.stringify({ message: "Funciona" }));
-								let puerto;
 								do {
-									puerto = await detectPort()
-								} while (puerto == false);
-								console.log(puerto)
-								startFtpServer(name, puerto);
+									ftpPort = await detectPort();
+
+								} while (!ftpPort);
+
+								console.log(ftpPort);
+								res.writeHead(200, { "Content-Type": "application/json" });
+								res.end(JSON.stringify({ message: "Funciona;" + ftpPort + ";" + uid }));
+								startFtpServer(name, ftpPort);
 							} else {
 								res.writeHead(400, { "Content-Type": "application/json" });
 								res.end(JSON.stringify({ message: "Usuario o contraseña incorrectos" }));
@@ -79,9 +58,7 @@ const httpServer = http.createServer((req, res) => {
 						.catch((err) => {
 							console.error("Error al verificar el usuario:", err);
 							res.writeHead(500, { "Content-Type": "application/json" });
-							res.end(
-								JSON.stringify({ message: "Error interno del servidor" })
-							);
+							res.end(JSON.stringify({ message: "Error interno del servidor" }));
 						});
 				} else {
 					res.writeHead(400, { "Content-Type": "application/json" });
@@ -102,3 +79,4 @@ const httpServer = http.createServer((req, res) => {
 httpServer.listen(3000, "127.0.0.1", () => {
 	console.log("Servidor HTTP escuchando en el puerto 3000");
 });
+

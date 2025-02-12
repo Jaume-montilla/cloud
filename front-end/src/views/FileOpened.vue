@@ -22,10 +22,12 @@ function getCookie(cname) {
   return "";
 }
 var name = ""
+var port = ""
 
 	onBeforeMount(() => {
 	name = getCookie("username")
-getFileInfo(props.name, name).then(x => {
+	port = getCookie("port")
+	getFileInfo(props.name, name, port).then(x => {
 	info.value.push(x['content'])
 	infoOgValue =	info.value
 		})
@@ -34,7 +36,7 @@ getFileInfo(props.name, name).then(x => {
 const save = () => {
 if (info.value != infoOgValue) {
 	infoOgValue = info.value
-	updateFile(props.name, infoOgValue, name).then(x => {
+	updateFile(props.name, infoOgValue, name, port).then(x => {
 		console.log(x)
 	})
 	console.log(info.value)

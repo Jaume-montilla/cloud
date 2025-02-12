@@ -15,10 +15,11 @@ const check = (() => {
     console.log(user.value.name)
     logIn(user.value.name, user.value.passwd).then((x) => {
         console.log(x.message)
-				if (x.message === "Funciona") {
-
+				const [aut, port, uid] = x.message.split(";");
+				if (aut === "Funciona") {
 				document.cookie = "username="+user.value.name+"; expires=Thu, 18 Dec 2026 12:00:00 UTC";
-				//document.cookie = "port="++"; expires=Thu, 18 Dec 2026 12:00:00 UTC";
+				document.cookie = "port="+ port+"; expires=Thu, 18 Dec 2026 12:00:00 UTC";
+				document.cookie = "uid="+ uid+"; expires=Thu, 18 Dec 2026 12:00:00 UTC";
 						router.push({ name: 'id'})
 				}
     })

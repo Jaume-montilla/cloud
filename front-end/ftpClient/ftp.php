@@ -5,52 +5,43 @@ header('Access-Control-Allow-Headers: Content-Type');
 header('Content-Type: application/json');
 
 $ftp_host = "127.0.0.1";
-$ftp_user = "";
+$ftp_user = $_GET['user'];
 $ftp_pass = "";
-$ftp_port = 0;
-$action = $_GET['action'] ?? null;
+$ftp_port = (int)$_GET['port'];
+$action = $_GET['action'];
 
-## falta que el user y el pwd se manden con la cookie de sesion
+$ftp_conn = ftp_connect($ftp_host, $ftp_port) or die(json_encode(["success" => false, "message" => "Unable to connect to FTP server on port $ftp_port."]));
 
-$ftp_conn = ftp_connect("127.0.0.1", $ftp_port) or die(json_encode(["success" => false, "message" => "Unable to connect to FTP server."]));
-
-function connect($user) {
-	ftp_login($GLOBALS["ftp_conn"], $user, "");
-	return $GLOBALS["ftp_conn"];
-};
+function connect($user, $pass, $port) {
+    $conn = ftp_connect($GLOBALS["ftp_host"], $port);
+    if (!$conn) {
+        die(json_encode(["success" => false, "message" => "Unable to connect to FTP server on port $port."]));
+    }
+    ftp_login($conn, $user, $pass);
+    return $conn;
+}
 
 switch ($action) {
-	case 'log':
-		$ftp_user = $_GET['user'] ?? '';
-		$ftp_user = $_GET['user'] ?? '';
-		$ftp_conn = connect($ftp_user, $ftp_pass);
-		echo json_encode(["success" => $ftp_user]);
-
-		break;
+    case 'log':
+        $ftp_conn = connect($ftp_user, $ftp_pass, $ftp_port);
+        echo json_encode(["success" => true, "message" => "Connected successfully."]);
+        break;
+    
     case 'list':
-        $folder = $_GET['folder'] ?? '';         
-				$ftp_user = $_GET['user'] ?? '';
-				$ftp_port= $_GET['port'] ?? '';
-				$ftp_conn = connect($ftp_user, $ftp_pass);
-				$files = ftp_nlist($ftp_conn, $folder ? $folder : '.');
+        $folder = $_GET['folder'] ?? '.';
+        $ftp_conn = connect($ftp_user, $ftp_pass, $ftp_port);
+        $files = ftp_nlist($ftp_conn, $folder);
         ftp_close($ftp_conn);
-
         echo json_encode(["success" => true, "files" => $files]);
         break;
 
     case 'upload':
         $file = $_FILES['file'] ?? null;
-				$ftp_user = $_GET['user'] ?? '';
         if ($file && $file['tmp_name']) {
-						$ftp_conn = connect($ftp_user, $ftp_pass);
-
+            $ftp_conn = connect($ftp_user, $ftp_pass, $ftp_port);
             $upload = ftp_put($ftp_conn, $file['name'], $file['tmp_name'], FTP_BINARY);
             ftp_close($ftp_conn);
-
-            echo json_encode([
-                "success" => $upload,
-                "message" => $upload ? "File uploaded successfully." : "File upload failed."
-            ]);
+            echo json_encode(["success" => $upload, "message" => $upload ? "File uploaded successfully." : "File upload failed."]);
         } else {
             echo json_encode(["success" => false, "message" => "No file uploaded."]);
         }
@@ -59,18 +50,11 @@ switch ($action) {
     case 'delete':
         $post_data = json_decode(file_get_contents("php://input"), true);
         $file = $post_data['file'] ?? null;
-				$ftp_user = $_GET['user'] ?? '';
-
         if ($file) {
-						$ftp_conn = connect($ftp_user, $ftp_pass);
-
+            $ftp_conn = connect($ftp_user, $ftp_pass, $ftp_port);
             $delete = ftp_delete($ftp_conn, $file);
             ftp_close($ftp_conn);
-
-            echo json_encode([
-                "success" => $delete,
-                "message" => $delete ? "File deleted successfully." : "File deletion failed."
-            ]);
+            echo json_encode(["success" => $delete, "message" => $delete ? "File deleted successfully." : "File deletion failed."]);
         } else {
             echo json_encode(["success" => false, "message" => "No file specified for deletion."]);
         }
@@ -79,26 +63,17 @@ switch ($action) {
     case 'read':
         $post_data = json_decode(file_get_contents("php://input"), true);
         $file = $post_data['file'] ?? null;
-				$ftp_user = $_GET['user'] ?? '';
-
         if ($file) {
-						$ftp_conn = connect($ftp_user, $ftp_pass);
+            $ftp_conn = connect($ftp_user, $ftp_pass, $ftp_port);
             $temp_file = tempnam(sys_get_temp_dir(), 'ftp_');
             if (ftp_get($ftp_conn, $temp_file, $file, FTP_BINARY)) {
                 $file_content = file_get_contents($temp_file);
-                unlink($temp_file); 
+                unlink($temp_file);
                 ftp_close($ftp_conn);
-
-                echo json_encode([
-                    "success" => true,
-                    "content" => $file_content
-                ]);
+                echo json_encode(["success" => true, "content" => $file_content]);
             } else {
                 ftp_close($ftp_conn);
-                echo json_encode([
-                    "success" => false,
-                    "message" => "Failed to retrieve the file content."
-                ]);
+                echo json_encode(["success" => false, "message" => "Failed to retrieve the file content."]);
             }
         } else {
             echo json_encode(["success" => false, "message" => "No file specified for reading."]);
@@ -107,25 +82,16 @@ switch ($action) {
 
     case 'update':
         $post_data = json_decode(file_get_contents("php://input"), true);
-        $file = $post_data['file'] ?? null;  
-        $content = $post_data['content'] ?? null;  
-				$ftp_user = $_GET['user'] ?? '';
-
+        $file = $post_data['file'] ?? null;
+        $content = $post_data['content'] ?? null;
         if ($file && $content) {
             $temp_file = tempnam(sys_get_temp_dir(), 'ftp_');
-            file_put_contents($temp_file, $content);  
-
-						$ftp_conn = connect($ftp_user, $ftp_pass);
-
+            file_put_contents($temp_file, $content);
+            $ftp_conn = connect($ftp_user, $ftp_pass, $ftp_port);
             $upload = ftp_put($ftp_conn, $file, $temp_file, FTP_BINARY);
-
-            unlink($temp_file);  
+            unlink($temp_file);
             ftp_close($ftp_conn);
-
-            echo json_encode([
-                "success" => $upload,
-                "message" => $upload ? "File updated successfully." : "File update failed."
-            ]);
+            echo json_encode(["success" => $upload, "message" => $upload ? "File updated successfully." : "File update failed."]);
         } else {
             echo json_encode(["success" => false, "message" => "No file or content provided."]);
         }
@@ -135,4 +101,5 @@ switch ($action) {
         echo json_encode(["success" => false, "message" => "Invalid action."]);
         break;
 }
+
 ?>
