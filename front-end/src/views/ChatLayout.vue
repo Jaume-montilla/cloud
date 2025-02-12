@@ -1,12 +1,12 @@
 <template>
   <div class="chat-container">
-  <ChatList @click=connectWebSocket @select-chat="selectChat" />
+    <ChatList @select-chat="selectChat" />
     <ChatWindow :selectedChat="selectedChat" :connection="connection" :messages="messages[selectedChat?.id] || []" @send-message="sendMessage" />
   </div>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { onBeforeMount, ref } from "vue";
 import ChatList from "@/components/ChatList.vue";
 import ChatWindow from "@/components/ChatWindow.vue";
 
@@ -16,6 +16,10 @@ const connection = ref(null);
 
 const selectChat = (chat) => {
   selectedChat.value = chat;
+};
+
+const updateChats = (contacts) => {
+  window.dispatchEvent(new CustomEvent('update-contacts', { detail: contacts }));
 };
 
 function getCookie(cname) {
@@ -34,27 +38,22 @@ function getCookie(cname) {
   return "";
 }
 
-
 const sendMessage = (message) => {
   if (selectedChat.value && connection.value && connection.value.readyState === WebSocket.OPEN) {
     connection.value.send(JSON.stringify({ chatId: selectedChat.value.id, message }));
     if (!messages.value[selectedChat.value.id]) {
       messages.value[selectedChat.value.id] = [];
     }
-    messages.value[selectedChat.value.id].push({ ...message, sender: getCookie("username") , receiver: "other"});
+    messages.value[selectedChat.value.id].push({ ...message, sender: getCookie("username"), receiver: "other"});
     console.log("Mensaje enviado:", message);
   }
 };
 
 function connectWebSocket() {
-  if (!selectedChat.value) {
-    return;
-  }
-  // cambiar el mycustomID por el id del usuario logueado y que se pase como prop a todas las paginas que lo use :) okey
-
-  const clientId = String(selectedChat.value.id);
-  connection.value = new WebSocket(`ws://localhost:8080/?myCustomID=${name}&connectionID=${clientId}`);
-
+  const clientId = "1"; 
+  const name = getCookie("username"); 
+  connection.value = new WebSocket(`ws://localhost:8080/?myCustomID=${name}&connectionID=${clientId}`); 
+  
   connection.value.onopen = () => {
     console.log("WebSocket Client Connected");
   };
@@ -67,21 +66,30 @@ function connectWebSocket() {
     console.log("Connection Closed");
   };
 
-  // connection.value.onmessage = (message) => {
-  //   if (message.data) {
-  //     const data = JSON.parse(message.data);
-  //     if (!messages.value[data.chatId]) {
-  //       messages.value[data.chatId] = [];
-  //     }
-  //     messages.value[data.chatId].push({ sender: "other", content: data.message });
-  //     console.log("Received:", data.message);
-  //   }
-  // };
+  connection.value.onmessage = async (message) => {
+    try {
+      let parsedData;
+      
+      if (message.data instanceof Blob) {
+        const text = await message.data.text();
+        parsedData = JSON.parse(text);
+      } else {
+        parsedData = JSON.parse(message.data);
+      }
+
+      if (Array.isArray(parsedData)) {
+        console.log("Received:", parsedData);
+        updateChats(parsedData);
+      }
+    } catch (error) {
+      console.error("Error processing message:", error);
+    }
+  };
 }
 
-window.onload = () => {
+onBeforeMount(() => {
   connectWebSocket();
-};
+});
 </script>
 
 <style scoped>

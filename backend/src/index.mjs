@@ -43,7 +43,7 @@ const httpServer = http.createServer((req, res) => {
 							console.log(result);
 
 							if (result === "Inicio de sesión exitoso") {
-								// kill(9876)
+								kill(9876)
 								res.writeHead(200, { "Content-Type": "application/json" });
 								res.end(JSON.stringify({ message: "Funciona" }));
 								startFtpServer(name);
@@ -78,4 +78,3 @@ const httpServer = http.createServer((req, res) => {
 httpServer.listen(3000, "127.0.0.1", () => {
 	console.log("Servidor HTTP escuchando en el puerto 3000");
 });
-

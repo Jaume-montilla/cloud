@@ -1,8 +1,8 @@
-import WebSocket from 'ws';
-import { connect, getMessages } from './mongo_chats.mjs';
+import { WebSocketServer } from 'ws';
+import { connect, getMessages, getContacts } from './mongo_chats.mjs';
 import url from 'url';
 
-const wss = new WebSocket.Server({ port: 8080 });
+const wss = new WebSocketServer({ port: 8080, host: 'localhost' });
 
 const clients = new Set();
 
@@ -10,6 +10,7 @@ wss.getUniqueID = function () {
     return Math.floor(Math.random() * 1000000);
 };
 
+console.log(wss);
 wss.on('connection', (ws, req) => {
     console.log("Nuevo cliente conectado");
 
@@ -18,8 +19,12 @@ wss.on('connection', (ws, req) => {
     ws.connected = parameters.query.connectionID;
 
     clients.add(ws);
-    getMessages(ws.uid, ws.connected).then((x) => {
-        console.log(x);
+    // getMessages(ws.uid, ws.connected).then((x) => {
+    //     console.log(x);
+    //     ws.send(JSON.stringify(x));
+    // });
+
+    getContacts().then((x) => {
         ws.send(JSON.stringify(x));
     });
 

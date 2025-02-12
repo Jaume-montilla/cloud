@@ -5,8 +5,8 @@
       <span>{{ selectedChat.name }}</span>
     </div>
     <div class="chat-messages" ref="messagesContainer" id="messagesContainer">
-      <div v-for="message in messages" :key="message.id"
-        :class="['message', message.receiver == props.selectedChat.id ? 'sent' : 'received']">
+      <div v-for="message in localMessages" :key="message.id"
+        :class="['message', message.sender === username ? 'sent' : 'received']">
         <p>{{ message.content }}</p>
         <span class="timestamp">{{ message.timestamp }}</span>
       </div>
@@ -19,7 +19,7 @@
         <button @click="sendImage">Send photos</button>
       </div>
 
-      <input type="text" v-model="newMessage" placeholder="Type a message..." />
+      <input type="text" v-model="newMessage" placeholder="Type a message..." @keyup.enter="sendMessage" />
       <button class="send-button" @click="sendMessage">Send</button>
     </div>
   </div>
@@ -31,11 +31,18 @@
 
 <script setup>
 import { ref, onMounted, nextTick, watch } from "vue";
+
 const props = defineProps({
   selectedChat: Object,
   messages: Array,
   connection: Object,
 });
+
+const username = ref(getCookie("username"));
+const localMessages = ref([]);
+const newMessage = ref("");
+const showMenu = ref(false);
+
 function getCookie(cname) {
   let name = cname + "=";
   let decodedCookie = decodeURIComponent(document.cookie);
@@ -52,12 +59,7 @@ function getCookie(cname) {
   return "";
 }
 
-const messages = ref([]);
-
 const emit = defineEmits(["send-message"]);
-
-const newMessage = ref("");
-const showMenu = ref(false);
 
 const toggleMenu = () => {
   showMenu.value = !showMenu.value;
@@ -70,7 +72,7 @@ const sendMessage = () => {
 
     const message = {
       id: now.getTime(),
-      sender:getCookie("username"),
+      sender: username.value,
       receiver: props.selectedChat.id,
       content: newMessage.value.trim(),
       timestamp,
@@ -91,37 +93,51 @@ const scrollToBottom = () => {
   });
 };
 
-var msgSended = []
-var msgReceived = []
-watch(() => props.connection, (newConnection) => {
+watch(() => props.connection, async (newConnection) => {
   if (newConnection) {
-    newConnection.onmessage = (message) => {
-      messages.value = [];
-      if (message.data) {
-        const data = JSON.parse(message.data);
-        data.forEach(sms => {
-          if (sms.receiver == props.selectedChat.id) {
-            console.log(sms.receiver); 
-            msgSended.push(sms);
-
-            scrollToBottom();
-          }
-          else{
-            msgReceived.push(sms);
-          }
-          messages.value.push({
-  id: new Date().getTime(),
-  sender: sms.sender,
-  receiver: sms.receiver,
-  content: sms.message,
-  timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-});
-        });
-        console.log(msgReceived)
-        console.log(msgSended)         
+    newConnection.onmessage = async (message) => {
+      let data;
+      if (message.data instanceof Blob) {
+        const text = await message.data.text();
+        try {
+          data = JSON.parse(text);
+        } catch (e) {
+          console.error('Error parsing message:', e);
+          return;
         }
+      } else {
+        try {
+          data = JSON.parse(message.data);
+        } catch (e) {
+          console.error('Error parsing message:', e);
+          return;
+        }
+      }
+
+      if (Array.isArray(data)) {
+        const filteredMessages = data.filter(msg => 
+          (msg.sender === username.value && msg.receiver === props.selectedChat.id) ||
+          (msg.receiver === username.value && msg.sender === props.selectedChat.id)
+        );
+        
+        localMessages.value = filteredMessages.map(msg => ({
+          id: new Date().getTime(),
+          sender: msg.sender,
+          receiver: msg.receiver,
+          content: msg.message || msg.content,
+          timestamp: new Date(msg.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+        }));
+        
         scrollToBottom();
+      }
     };
+  }
+});
+
+watch(() => props.messages, (newMessages) => {
+  if (newMessages) {
+    localMessages.value = newMessages;
+    scrollToBottom();
   }
 });
 
@@ -273,4 +289,5 @@ onMounted(() => {
   text-align: center;
   background-color: #e9e9e9;
 }
+
 </style>

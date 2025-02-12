@@ -64,3 +64,27 @@ export async function getMessages(senderU, receiverU) {
     messagesList = sms;
     return messagesList;
 }
+
+export async function getContacts() {
+    const url = "mongodb://localhost:27017";
+    try {
+        await mongoose.connect(url);
+        const Schema = mongoose.Schema;
+
+        const usrSchema = new Schema({
+            name: String,
+            psswd: String,
+            email: String,
+        });
+
+        const User = mongoose.models.User || mongoose.model("User", usrSchema);
+
+        const users = await User.find({});
+        await mongoose.connection.close();
+        return users;
+    } catch (err) {
+        await mongoose.connection.close();
+        console.error("Error en getContacts:", err);
+        return [];
+    }
+}

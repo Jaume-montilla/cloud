@@ -12,22 +12,30 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 
-const chats = ref([
-  { id: 1, name: "Contact 1", image: "/images/profile1.png" },
-  { id: 2, name: "Contact 2", image: "/images/profile2.png" },
-  { id: 3, name: "Contact 3", image: "/images/profile3.png" },
-  { id: 4, name: "Group 1", image: "/images/group1.png" },
-  { id: 5, name: "Contact 4", image: "/images/profile4.png" },
-]);
-
+const chats = ref([]);
 const searchTerm = ref("");
 
 const filteredChats = computed(() => {
-  return chats.value.filter((chat) =>
+  const filtered = chats.value.filter((chat) =>
     chat.name.toLowerCase().includes(searchTerm.value.toLowerCase())
   );
+  return filtered;
+});
+
+const updateChats = (contacts) => {
+  chats.value = contacts.map(contact => ({
+    id: contact._id,
+    name: contact.name,
+    image: "/images/default.png" 
+  }));
+};
+
+onMounted(() => {
+  window.addEventListener('update-contacts', (event) => {
+    updateChats(event.detail);
+  });
 });
 </script>
 
