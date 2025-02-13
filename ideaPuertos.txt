@@ -1,0 +1,1 @@
+Dani: guardar el timestamp y si no se actualiza en 30 min se cierra el server;

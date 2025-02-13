@@ -46,7 +46,7 @@ switch (fileExtension) {
 
 const delet = () => {
     if (confirm("Are you sure you want to delete the file?")) {
-        deleteFile(props.fileNow); 
+        deleteFile(props.fileNow, port); 
     }
 }
 </script>

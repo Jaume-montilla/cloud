@@ -1,6 +1,6 @@
 <script setup>
 	import { ref, onMounted, onBeforeMount} from 'vue';
-	import { list, getFileInfo, updateFile } from '../services/ftp.js'
+	import { getFileInfo, updateFile } from '../services/ftp.js'
 
 	const props = defineProps(['name'])
 	const info = ref([])
