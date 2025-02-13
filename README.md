@@ -1,1 +1,1 @@
-# 'las personas tienen libre albedio siendo controlados por las redes sociales y en que momento las personas solo aprecian a controlar a las personas anates que como ayudarlas' - alquien que no usa vscode
+# 'las personas tienen libre albedio siendo controlados por las redes sociales y en que momento estas solo quieren tener control e influencia sobre las personas anates de ayudarlas. fkf a todo' - alquien que no usa vscode
