@@ -1,1 +1,0 @@
-# 'las personas tienen libre albedio siendo controlados por las redes sociales y en que momento estas solo quieren tener control e influencia sobre las personas anates de ayudarlas. fkf a todo' - alquien que no usa vscode
