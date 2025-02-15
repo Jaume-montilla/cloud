@@ -1,7 +1,7 @@
-import ftpd from 'ftpd'
-import fs from 'fs'
-import path from 'path'
-
+import ftpd from 'ftpd';
+import fs from 'fs';
+import path from 'path';
+import { saveFileHash } from './mysql_hash.mjs';
 const baseDir = path.join('./', '..', 'users');
 
 function startFtpServer(username, port) {
@@ -12,15 +12,8 @@ function startFtpServer(username, port) {
 	};
 
 	let server = new ftpd.FtpServer(options.host, {
-		getInitialCwd: function () {
-			return './';
-		},
-		getRoot: function () {
-			if (username == "admin") {
-				return baseDir;
-			}
-			return path.join(baseDir, username);
-		},
+		getInitialCwd: () => './',
+		getRoot: () => username === "admin" ? baseDir : path.join(baseDir, username),
 		pasvPortRangeStart: 1025,
 		pasvPortRangeEnd: 1050,
 		tlsOptions: options.tls,
@@ -35,43 +28,36 @@ function startFtpServer(username, port) {
 		]
 	});
 
-	server.on('error', function (error) {
-		console.log('FTP Server error:', error)
-	})
+	server.on('error', (error) => console.log('FTP Server error:', error));
 
-	server.on('client:connected', function (connection) {
-		console.log('client connected: ' + connection.remoteAddress)
+	server.on('client:connected', (connection) => {
+		console.log('Client connected:', connection.remoteAddress);
 
-		connection.on('command:mkd', function (dirName) {
-			const userDir = path.join(baseDir, process.env.usuari, dirName);
-			fs.mkdirSync(userDir, { recursive: true });
+		connection.on('command:stor', (fileName, fileStream) => {
+			const userDir = connection.root;
+			const filePath = path.join(userDir, fileName);
+
+			fileStream.on('finish', async () => {
+				console.log(`File uploaded: ${filePath}`);
+				saveFileHash(filePath, username).then((x) => {
+					console.log(x)
+				});
+			});
 		});
 
-		connection.on('command:user', function (user, success, failure) {
-			if (user == username) {
-				success()
-			} else {
-				failure()
-			}
-		})
+		connection.on('command:user', (user, success, failure) => user === username ? success() : failure());
+		connection.on('command:pass', (pass, success) => success(username));
 
-		connection.on('command:pass', function (pass, success, failure) {
-			success(username)
-		})
-
-		// Aquí manejamos el comando quit
-		connection.on('command:quit', function () {
-			console.log("Cliente ha cerrado la conexión. Cerrando servidor...");
-			server.close();  // Detenemos el servidor FTP
-		})
-	})
-
+		connection.on('command:quit', () => {
+			console.log("Client disconnected. Closing server...");
+			server.close();
+		});
+	});
 
 	server.debugging = 4;
 	server.listen(options.port);
 	console.log('FTP Server listening on port ' + options.port);
-	return server;  // Devolvemos el objeto server para poder cerrarlo desde otro lugar
+	return server;
 }
 
 export default startFtpServer;
-

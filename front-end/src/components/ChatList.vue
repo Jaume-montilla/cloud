@@ -25,11 +25,15 @@ const filteredChats = computed(() => {
 });
 
 const updateChats = (contacts) => {
+	contacts.forEach(contact=> {
+		console.log(contact._id, contact.name)
+	});
   chats.value = contacts.map(contact => ({
     id: contact._id,
     name: contact.name,
     image: "/images/default.png" 
   }));
+	console.log(chats.value)
 };
 
 onMounted(() => {

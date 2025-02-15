@@ -1,16 +1,18 @@
 <script setup>
 import { ref, onMounted, onBeforeMount } from 'vue'
-import { list, getFileInfo, putFile} from '../services/ftp.js'
+import { list, getFileInfo, putFile } from '../services/ftp.js'
 import File from '../components/Files.vue'
 
 const files = ref([])
 const currentFolder = ref('')  
 const emit = defineEmits(['files-dropped'])
+var name = ""
+var port = ""
 var path = ""
 
-const loadFiles = async (folder) => {
+const loadFiles = async (folder = '') => {
   currentFolder.value = folder
-  const response = await list(folder, name, port) 
+  const response = await list(folder, name, port)
   files.value = response.files
 }
 
@@ -18,22 +20,18 @@ function getCookie(cname) {
   let name = cname + "=";
   let decodedCookie = decodeURIComponent(document.cookie);
   let ca = decodedCookie.split(';');
-  for(let i = 0; i <ca.length; i++) {
-    let c = ca[i];
-    while (c.charAt(0) == ' ') {
-      c = c.substring(1);
-    }
+  for(let i = 0; i < ca.length; i++) {
+    let c = ca[i].trim();
     if (c.indexOf(name) == 0) {
       return c.substring(name.length, c.length);
     }
   }
   return "";
 }
-var name = ""
-var port = ""
+
 onBeforeMount(async () => {
-	name = getCookie("username")
-	port = getCookie("port")
+  name = getCookie("username")
+  port = getCookie("port")
 })
 
 onMounted(async () => {
@@ -41,8 +39,10 @@ onMounted(async () => {
 })
 
 const create = (fileName, fileContent = "File created!!") => {
-  putFile(fileName, fileContent, name, port).then(() => {
-    loadFiles(currentFolder.value)    })
+  const filePath = path ? `${path}/${fileName}` : fileName
+  putFile(filePath, fileContent, name, port).then(() => {
+    loadFiles(currentFolder.value)
+  })
 }
 
 let active = ref(false)
@@ -74,17 +74,24 @@ function onDrop(e) {
 }
 
 const openFolder = (folderName) => {
-	path += "/"+folderName
-  loadFiles(folderName) }
+  path = path ? `${path}/${folderName}` : folderName
+  console.log(path)
+  loadFiles(path)
+}
+
+const resetToRoot = () => {
+  path = ""
+  loadFiles()
+}
 </script>
 
 <template>
   <div class="head">
     <img src="" alt="logo">
-		<p @click="$router.push({ name: 'chat'})">Chats</p>
+    <p @click="$router.push({ name: 'chat'})">Chats</p>
   </div>
   <main>
-    <p class="grettering">Welcome back!</p>
+    <p class="greeting">Welcome back!</p>
     <section id="management">
       <div class="typedFilt">
         <div class="searchBox">
@@ -95,15 +102,16 @@ const openFolder = (folderName) => {
       </div>
       <div class="filterCapsule">
         <div class="preMadeFiltres">
-          <button class="type" id="type"> &#11167; Tipo</button>
-          <button class="people" id="people"> &#11167; Personas</button>
-          <button class="modify" id="modify"> &#11167; Modificado</button>
-          <button class="fuente" id="fuente"> &#11167; Fuente</button>
+          <button class="type"> &#11167; Tipo</button>
+          <button class="people"> &#11167; Personas</button>
+          <button class="modify"> &#11167; Modificado</button>
+          <button class="fuente"> &#11167; Fuente</button>
         </div>
       </div>
     </section>
     <section class="files">
       <p class="archivosSugeridos">Archivos Sugeridos</p>
+      <button v-if="path" @click="resetToRoot">⬅ Back to Root</button>
       <div :data-active="active" @dragenter.prevent="setActive" @dragover.prevent="setActive" @dragleave.prevent="setInactive" @drop.prevent="onDrop">
         <p v-if="active">Drop your file here</p>
         <p v-if="!active">Drag your file here</p>
@@ -111,8 +119,8 @@ const openFolder = (folderName) => {
       </div>
       <div class="allFiles">
         <div v-for="file in files" :key="file">
-          <File :fileNow="file" />
-          <button @click="openFolder(file)">Abrir Carpeta</button>
+          <File :fileNow="file" :path="path"  />
+          <button v-if="file.lastIndexOf('.') === -1" @click="openFolder(file)">Abrir Carpeta</button>
         </div>
       </div>
     </section>

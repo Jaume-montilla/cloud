@@ -35,7 +35,7 @@ const check = (() => {
             <h1 class="title_card">Log In</h1>
             <div class="card_elements_login">
                 <input v-model="user.name" type="text" value="" placeholder="User id" class="input_card_element1">
-                <input v-model="user.passwd" type="text" value="" placeholder="Password" class="input_card_element2">
+                <input v-model="user.passwd" type="password" value="" placeholder="Password" class="input_card_element2">
             </div>
             <div class="rememb_login">
                 <div class="remlab_login">

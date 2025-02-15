@@ -41,12 +41,9 @@ const httpServer = http.createServer((req, res) => {
 							const [allow, uid] = result.split(";");
 							if (allow === "Inicio de sesión exitoso") {
 								let ftpPort;
-
 								do {
 									ftpPort = await detectPort();
-
 								} while (!ftpPort);
-
 								console.log(ftpPort);
 								res.writeHead(200, { "Content-Type": "application/json" });
 								res.end(JSON.stringify({ message: "Funciona;" + ftpPort + ";" + uid }));
