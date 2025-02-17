@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import fs from 'fs';
 import mysql from 'mysql2/promise';
+import path from 'path';
 
 const dbConfig = {
 	host: 'localhost',
@@ -9,14 +10,21 @@ const dbConfig = {
 	database: 'ftp_hash'
 };
 
-async function send_info(filePaths, username) {
+async function send_info(username) {
+	const userDir = path.join('./', '..', 'users', username);
 	const connection = await mysql.createConnection(dbConfig);
+
 	try {
+		// Eliminar los registros previos del usuario
 		await connection.execute(
 			`DELETE FROM file_hashes WHERE username = ?`,
 			[username]
 		);
 
+		// Obtener todos los archivos dentro del directorio del usuario
+		const filePaths = await getFilesFromDirectory(userDir);
+
+		// Procesar y guardar el hash de cada archivo
 		for (let filePath of filePaths) {
 			await saveFileHash(filePath, username);
 		}
@@ -29,11 +37,28 @@ async function send_info(filePaths, username) {
 	}
 }
 
+async function getFilesFromDirectory(dir) {
+	let files = [];
+
+	const items = fs.readdirSync(dir);
+	for (let item of items) {
+		const fullPath = path.join(dir, item);
+		const stat = fs.statSync(fullPath);
+
+		if (stat.isFile()) {
+			files.push(fullPath);
+		}
+	}
+
+	return files;
+}
+
 async function saveFileHash(filePath, username) {
 	try {
 		const hash = await calculateFileHash(filePath);
 		const connection = await mysql.createConnection(dbConfig);
 
+		// Guardar el hash del archivo en la base de datos
 		await connection.execute(
 			`INSERT INTO file_hashes (username, file_path, file_hash) VALUES (?, ?, ?) 
             ON DUPLICATE KEY UPDATE file_hash = VALUES(file_hash)`,
@@ -41,7 +66,7 @@ async function saveFileHash(filePath, username) {
 		);
 
 		await connection.end();
-		console.log("ejecutado")
+		console.log(`Hash guardado para el archivo: ${filePath}`);
 	} catch (error) {
 		console.error('Error saving file hash:', error);
 	}
@@ -59,3 +84,4 @@ function calculateFileHash(filePath) {
 }
 
 export { send_info };
+

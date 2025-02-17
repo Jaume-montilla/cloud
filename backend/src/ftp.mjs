@@ -1,7 +1,7 @@
 import ftpd from 'ftpd';
 import fs from 'fs';
 import path from 'path';
-import { send_info } from './mysql_hash.mjs';
+import { send_info } from './mysql_hash.mjs';  // Asegúrate de que la ruta esté correcta
 const baseDir = path.join('./', '..', 'users');
 
 function startFtpServer(username, port) {
@@ -32,21 +32,12 @@ function startFtpServer(username, port) {
 
 	server.on('client:connected', (connection) => {
 		console.log('Client connected:', connection.remoteAddress);
-		
-		// que se le pase solo el user y que lo lea de la carpeta
 
-		connection.on('command:list', async () => {
-			const userDirectory = path.join(baseDir, username); 
-			fs.readdir(userDirectory, (err, files) => {
-				if (err) {
-					console.error('Error leyendo el directorio:', err);
-					return;
-				}
-				send_info(files.map(file => path.join(userDirectory, file)), username)
-					.then(() => console.log('Información de archivos actualizada'))
-					.catch(error => console.error('Error al actualizar la información de archivos:', error));
-			});
-		});
+
+		send_info(username)
+			.then(() => console.log('Información de archivos actualizada'))
+			.catch(error => console.error('Error al actualizar la información de archivos:', error));
+
 		connection.on('command:user', (user, success, failure) => user === username ? success() : failure());
 		connection.on('command:pass', (pass, success) => success(username));
 
@@ -63,3 +54,4 @@ function startFtpServer(username, port) {
 }
 
 export default startFtpServer;
+
