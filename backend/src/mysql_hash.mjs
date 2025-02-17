@@ -9,6 +9,26 @@ const dbConfig = {
 	database: 'ftp_hash'
 };
 
+async function send_info(filePaths, username) {
+	const connection = await mysql.createConnection(dbConfig);
+	try {
+		await connection.execute(
+			`DELETE FROM file_hashes WHERE username = ?`,
+			[username]
+		);
+
+		for (let filePath of filePaths) {
+			await saveFileHash(filePath, username);
+		}
+
+		console.log('Archivos procesados correctamente');
+	} catch (error) {
+		console.error('Error al procesar los archivos:', error);
+	} finally {
+		await connection.end();
+	}
+}
+
 async function saveFileHash(filePath, username) {
 	try {
 		const hash = await calculateFileHash(filePath);
@@ -21,6 +41,7 @@ async function saveFileHash(filePath, username) {
 		);
 
 		await connection.end();
+		console.log("ejecutado")
 	} catch (error) {
 		console.error('Error saving file hash:', error);
 	}
@@ -37,4 +58,4 @@ function calculateFileHash(filePath) {
 	});
 }
 
-export { saveFileHash };
+export { send_info };

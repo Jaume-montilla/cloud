@@ -41,7 +41,7 @@ switch (fileExtension) {
         img.value = new URL('@/assets/excel.svg', import.meta.url).href;
         break;
     case "sh":
-    case "cmd":
+    case "bat":
     case "lua":
     case "cpp":
     case "json":
