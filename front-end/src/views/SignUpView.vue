@@ -102,15 +102,6 @@ p{
     outline: none;
 }
 
-
-/* .input_card_element2:focus-visible {
-    outline: none;
-}
-
-.input_card_element3:focus-visible {
-    outline: none;
-} */
-
 .input_card_element2 {
     border: 0;
     border-bottom: 1px groove rgb(0, 0, 0);

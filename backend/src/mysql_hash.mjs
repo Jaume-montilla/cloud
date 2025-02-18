@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import fs from 'fs';
 import mysql from 'mysql2/promise';
+import path from 'path';
 
 const dbConfig = {
 	host: 'localhost',
@@ -8,6 +9,43 @@ const dbConfig = {
 	password: 'ftp_hash_admin1',
 	database: 'ftp_hash'
 };
+
+async function send_info(username) {
+	const userDir = path.join('./', '..', 'users', username);
+	const connection = await mysql.createConnection(dbConfig);
+
+	try {
+		await connection.execute(
+			`DELETE FROM file_hashes WHERE username = ?`,
+			[username]
+		);
+		const filePaths = await getFilesFromDirectory(userDir);
+		for (let filePath of filePaths) {
+			await saveFileHash(filePath, username);
+		}
+		console.log('Archivos procesados correctamente');
+	} catch (error) {
+		console.error('Error al procesar los archivos:', error);
+	} finally {
+		await connection.end();
+	}
+}
+
+async function getFilesFromDirectory(dir) {
+	let files = [];
+
+	const items = fs.readdirSync(dir);
+	for (let item of items) {
+		const fullPath = path.join(dir, item);
+		const stat = fs.statSync(fullPath);
+
+		if (stat.isFile()) {
+			files.push(fullPath);
+		}
+	}
+
+	return files;
+}
 
 async function saveFileHash(filePath, username) {
 	try {
@@ -21,6 +59,7 @@ async function saveFileHash(filePath, username) {
 		);
 
 		await connection.end();
+		console.log(`Hash guardado para el archivo: ${filePath}`);
 	} catch (error) {
 		console.error('Error saving file hash:', error);
 	}
@@ -37,4 +76,4 @@ function calculateFileHash(filePath) {
 	});
 }
 
-export { saveFileHash };
+export { send_info };

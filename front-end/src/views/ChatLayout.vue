@@ -1,5 +1,6 @@
 <template>
   <div class="chat-container">
+    <p @click="$router.push({ name: 'file'})">Files</p>
     <ChatList @select-chat="selectChat" />
     <ChatWindow :selectedChat="selectedChat" :connection="connection" :messages="messages[selectedChat?.id] || []" @send-message="sendMessage" />
   </div>
@@ -65,25 +66,45 @@ function connectWebSocket() {
     console.log("Connection Closed");
   };
 
-  connection.value.onmessage = async (message) => {
-    try {
-      let parsedData;
-      
-      if (message.data instanceof Blob) {
-        const text = await message.data.text();
-        parsedData = JSON.parse(text);
-      } else {
-        parsedData = JSON.parse(message.data);
-      }
-
-      if (Array.isArray(parsedData)) {
-        console.log("Received:", parsedData);
-        updateChats(parsedData);
-      }
-    } catch (error) {
-      console.error("Error processing message:", error);
+connection.value.onmessage = async (message) => {
+  try {
+    let parsedData;
+    
+    if (message.data instanceof Blob) {
+      const text = await message.data.text();
+      parsedData = JSON.parse(text);
+    } else {
+      parsedData = JSON.parse(message.data);
     }
-  };
+
+    if (Array.isArray(parsedData)) {
+      console.log("Received:", parsedData);
+      
+			messages.value = []
+			if (!parsedData[0]) {
+				
+			} else {
+      if (!parsedData[0].message) {
+        updateChats(parsedData); 
+      } else {
+        parsedData.forEach((msg) => {
+          if (msg.sender && msg.receiver && msg.message) {
+            const chatId = msg.receiver;
+						if (!messages.value[chatId]) {
+              messages.value[chatId] = [];
+            }
+            messages.value[chatId].push(msg);
+						} else {
+            console.error("Mensaje incompleto:", msg);
+          }
+        });
+			}}
+    }
+  } catch (error) {
+    console.error("Error processing message:", error);
+  }
+};
+
 }
 
 onBeforeMount(() => {

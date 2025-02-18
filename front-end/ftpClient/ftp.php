@@ -1,10 +1,16 @@
 <?php
 header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST');
+header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
+header('Access-Control-Allow-Credentials: true');
 header('Content-Type: application/json');
 
-$ftp_host = "127.0.0.1";
+if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+    http_response_code(200);
+    exit();
+}
+
+$ftp_host = "backend";  
 $ftp_user = $_GET['user'];
 $ftp_pass = "";
 $ftp_port = (int)$_GET['port'];
@@ -101,5 +107,4 @@ switch ($action) {
         echo json_encode(["success" => false, "message" => "Invalid action."]);
         break;
 }
-
 ?>

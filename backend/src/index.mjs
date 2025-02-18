@@ -1,7 +1,9 @@
 import http from "http";
+import fs from "fs";
+import path from "path";
 import { saveUser, checkUser } from "./mongo_connection.mjs";
 import startFtpServer from "./ftp.mjs";
-import detectPort from "detect-port";
+import cors from "cors";
 import webS from "./websocket.mjs";
 
 webS()
@@ -10,6 +12,7 @@ const httpServer = http.createServer((req, res) => {
 	res.setHeader("Access-Control-Allow-Origin", "*");
 	res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
 	res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
 	if (req.method === "POST" && req.url === "/") {
 		let body = "";
 
@@ -26,6 +29,13 @@ const httpServer = http.createServer((req, res) => {
 					saveUser(name, password, email)
 						.then((result) => {
 							console.log(result);
+
+							const userFolderPath = path.join('..', 'users', name);
+							if (!fs.existsSync(userFolderPath)) {
+								fs.mkdirSync(userFolderPath, { recursive: true });
+								console.log(`Carpeta creada: ${userFolderPath}`);
+							}
+
 							res.writeHead(200, { "Content-Type": "application/json" });
 							res.end(JSON.stringify({ message: "Usuario creado exitosamente" }));
 						})
@@ -38,13 +48,9 @@ const httpServer = http.createServer((req, res) => {
 					checkUser(name, password)
 						.then(async (result) => {
 							console.log(result);
-							const [allow, uid] = result.split(";");
-							if (allow === "Inicio de sesión exitoso") {
-								let ftpPort;
-								do {
-									ftpPort = await detectPort();
-								} while (!ftpPort);
-								console.log(ftpPort);
+							if (typeof result === "string" && result.includes("Inicio de sesión exitoso")) {
+								const [allow, uid] = result.split(";");
+								let ftpPort = "9876";
 								res.writeHead(200, { "Content-Type": "application/json" });
 								res.end(JSON.stringify({ message: "Funciona;" + ftpPort + ";" + uid }));
 								startFtpServer(name, ftpPort);
@@ -74,7 +80,6 @@ const httpServer = http.createServer((req, res) => {
 	}
 });
 
-httpServer.listen(3000, "127.0.0.1", () => {
+httpServer.listen(3000, "0.0.0.0", () => {
 	console.log("Servidor HTTP escuchando en el puerto 3000");
 });
-

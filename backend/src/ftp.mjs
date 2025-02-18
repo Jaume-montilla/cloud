@@ -1,7 +1,7 @@
 import ftpd from 'ftpd';
 import fs from 'fs';
 import path from 'path';
-import { saveFileHash } from './mysql_hash.mjs';
+import { send_info } from './mysql_hash.mjs';  // Asegúrate de que la ruta esté correcta
 const baseDir = path.join('./', '..', 'users');
 
 function startFtpServer(username, port) {
@@ -33,17 +33,10 @@ function startFtpServer(username, port) {
 	server.on('client:connected', (connection) => {
 		console.log('Client connected:', connection.remoteAddress);
 
-		connection.on('command:stor', (fileName, fileStream) => {
-			const userDir = connection.root;
-			const filePath = path.join(userDir, fileName);
 
-			fileStream.on('finish', async () => {
-				console.log(`File uploaded: ${filePath}`);
-				saveFileHash(filePath, username).then((x) => {
-					console.log(x)
-				});
-			});
-		});
+		send_info(username)
+			.then(() => console.log('Información de archivos actualizada'))
+			.catch(error => console.error('Error al actualizar la información de archivos:', error));
 
 		connection.on('command:user', (user, success, failure) => user === username ? success() : failure());
 		connection.on('command:pass', (pass, success) => success(username));
@@ -61,3 +54,4 @@ function startFtpServer(username, port) {
 }
 
 export default startFtpServer;
+

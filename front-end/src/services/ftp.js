@@ -9,7 +9,7 @@ export async function list(folder = "", usuari, port) {
 }
 
 export async function log(usuari = "") {
-	return usuari
+	return usuari;
 }
 
 export async function getFileInfo(file, usuari, port) {
@@ -93,3 +93,4 @@ export async function putFile(fileName, fileContent, usuari, port) {
 		return { success: false, message: "Error uploading the file." };
 	}
 }
+

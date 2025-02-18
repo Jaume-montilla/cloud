@@ -1,9 +1,11 @@
 import { WebSocketServer } from 'ws';
-import { connect, getMessages, getContacts } from './mongo_chats.mjs';
+import { getMessages, getContacts, saveMessage, connectToMongo } from './mongo_connection.mjs';
 import url from 'url';
 
 export default function webS() {
-	const wss = new WebSocketServer({ port: 8080, host: 'localhost' });
+	connectToMongo();
+
+	const wss = new WebSocketServer({ port: 8080, host: '0.0.0.0' });
 
 	const clients = new Set();
 	console.log(wss);
@@ -16,8 +18,11 @@ export default function webS() {
 
 		clients.add(ws);
 
-		getContacts().then((x) => {
-			ws.send(JSON.stringify(x));
+		getContacts().then((contacts) => {
+			ws.send(JSON.stringify(contacts));
+		}).catch((err) => {
+			console.error("Error al obtener contactos:", err);
+			ws.send(JSON.stringify({ error: "Error al obtener contactos" }));
 		});
 
 		ws.on('message', async (data) => {
@@ -30,9 +35,13 @@ export default function webS() {
 				const chatMessages = await getMessages(message.sender, message.receiver);
 				ws.send(JSON.stringify(chatMessages));
 			} else {
-				await connect(message.message.sender, message.message.receiver, message.message.content);
-
-				if (ws.readyState === WebSocket.OPEN) {
+				try {
+					await saveMessage(message.message.sender, message.message.receiver, message.message.message);
+				} catch (err) {
+					console.error("Error al guardar el mensaje:", err);
+					ws.send(JSON.stringify({ error: "Error al guardar el mensaje" }));
+				}
+				if (ws.readyState === ws.OPEN) {
 					ws.send(data);
 				}
 			}
@@ -46,4 +55,3 @@ export default function webS() {
 
 	console.log('El servidor WebSocket está ejecutándose en el puerto 8080');
 }
-

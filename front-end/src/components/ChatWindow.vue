@@ -4,21 +4,17 @@
       <img :src="selectedChat.image" alt="Profile" class="profile-pic" />
       <span>{{ selectedChat.name }}</span>
     </div>
-    <div class="chat-messages" ref="messagesContainer" id="messagesContainer">
-      <div v-for="message in localMessages" :key="message.id"
-        :class="['message', message.sender === username ? 'sent' : 'received']">
-        <p>{{ message.content }}</p>
-        <span class="timestamp">{{ message.timestamp }}</span>
-      </div>
+    <div v-for="message in localMessages" :key="message._id" 
+         :class="['message', message.sender === userId ? 'sent' : 'received']">
+      <p>{{ message.message }}</p>
+      <span class="timestamp">{{ message.timestamp }}</span>
     </div>
     <div class="chat-input">
       <button class="attach-button" @click="toggleMenu">+</button>
-
       <div v-if="showMenu" class="menu-options">
         <button @click="sendFile">Send files</button>
         <button @click="sendImage">Send photos</button>
       </div>
-
       <input type="text" v-model="newMessage" placeholder="Type a message..." @keyup.enter="sendMessage" />
       <button class="send-button" @click="sendMessage">Send</button>
     </div>
@@ -38,7 +34,7 @@ const props = defineProps({
   connection: Object,
 });
 
-const username = ref(getCookie("username"));
+const userId = ref(getCookie("uid"));  
 const localMessages = ref([]);
 const newMessage = ref("");
 const showMenu = ref(false);
@@ -47,7 +43,7 @@ function getCookie(cname) {
   let name = cname + "=";
   let decodedCookie = decodeURIComponent(document.cookie);
   let ca = decodedCookie.split(';');
-  for(let i = 0; i <ca.length; i++) {
+  for(let i = 0; i < ca.length; i++) {
     let c = ca[i];
     while (c.charAt(0) == ' ') {
       c = c.substring(1);
@@ -71,10 +67,10 @@ const sendMessage = () => {
     const timestamp = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
     const message = {
-      id: now.getTime(),
-      sender: getCookie("uid"),
+      _id: now.getTime(),
+      sender: userId.value,
       receiver: props.selectedChat.id,
-      content: newMessage.value.trim(),
+      message: newMessage.value.trim(),
       timestamp,
     };
 
@@ -93,13 +89,18 @@ const scrollToBottom = () => {
   });
 };
 
+// Observa cuando cambia el chat seleccionado
 watch(() => props.selectedChat, async (newChat) => {
   if (newChat) {
-    localMessages.value = []; 
+    localMessages.value = [];
+    if (props.messages && props.messages[newChat.id]) {
+      localMessages.value = props.messages[newChat.id];
+    }
+
     if (props.connection && props.connection.readyState === WebSocket.OPEN) {
       const request = {
         action: "getMessages",
-        sender: getCookie("uid"),
+        sender: userId.value,
         receiver: newChat.id
       };
       props.connection.send(JSON.stringify(request));
@@ -130,17 +131,15 @@ watch(() => props.connection, async (newConnection) => {
 
       if (Array.isArray(data)) {
         const filteredMessages = data.filter(msg => 
-          (msg.sender === username.value && msg.receiver === props.selectedChat.id) ||
-          (msg.receiver === username.value && msg.sender === props.selectedChat.id)
+          (msg.sender === userId.value && msg.receiver === props.selectedChat.id) ||
+          (msg.receiver === userId.value && msg.sender === props.selectedChat.id)
         );
-        localMessages.value = filteredMessages.map(msg => ({
-          id: new Date().getTime(),
-          sender: msg.sender,
-          receiver: msg.receiver,
-          content: msg.message || msg.content,
-          timestamp: new Date(msg.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-        }));
-        
+
+        const newMessages = filteredMessages.filter((msg, index, self) =>
+          index === self.findIndex((m) => m._id === msg._id)
+        );
+
+        localMessages.value = [...localMessages.value, ...newMessages];
         scrollToBottom();
       }
     };
@@ -149,7 +148,10 @@ watch(() => props.connection, async (newConnection) => {
 
 watch(() => props.messages, (newMessages) => {
   if (newMessages) {
-    localMessages.value = newMessages;
+    localMessages.value = newMessages.filter(msg => 
+      (msg.sender === userId.value && msg.receiver === props.selectedChat.id) ||
+      (msg.receiver === userId.value && msg.sender === props.selectedChat.id)
+    );
     scrollToBottom();
   }
 });
@@ -158,6 +160,35 @@ onMounted(() => {
   scrollToBottom();
 });
 </script>
+
+
+
+<style scoped>
+.message-sender {
+  text-align: right;
+  background-color: #f0f0f0;
+}
+
+.message-receiver {
+  text-align: left;
+  background-color: #e0e0e0;
+}
+
+.messages-container {
+  max-height: 400px;
+  overflow-y: scroll;
+}
+
+.send-message {
+  display: flex;
+  justify-content: space-between;
+}
+
+.send-message input {
+  width: 80%;
+}
+</style>
+/*
 
 <style scoped>
 .chat-window {
@@ -198,16 +229,20 @@ onMounted(() => {
   padding: 10px;
   border-radius: 10px;
   max-width: 60%;
+  margin-bottom: 10px;
+  word-wrap: break-word;
 }
 
 .message.received {
   background-color: #ffffff;
   align-self: flex-start;
+  color: black;
 }
 
 .message.sent {
   background-color: #dcf8c6;
   align-self: flex-end;
+  color: black;
 }
 
 .timestamp {
@@ -302,5 +337,5 @@ onMounted(() => {
   text-align: center;
   background-color: #e9e9e9;
 }
-
 </style>
+*/

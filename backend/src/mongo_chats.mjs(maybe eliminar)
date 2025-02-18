@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 export async function connect(senderU, receiverU, messageU) {
-	mongoose.connect("mongodb://localhost:27017").then(() => {
+	mongoose.connect("mongodb://mongo:27017/test").then(() => {
 		const Schema = mongoose.Schema;
 
 		const messageSchema = new Schema({
@@ -44,7 +44,7 @@ export async function connect(senderU, receiverU, messageU) {
 
 export async function getMessages(senderU, receiverU) {
 	let messagesList = [];
-	await mongoose.connect("mongodb://localhost:27017");
+	await mongoose.connect("mongodb://mongo:27017/test");
 
 	const Schema = mongoose.Schema;
 
@@ -70,7 +70,7 @@ export async function getMessages(senderU, receiverU) {
 }
 
 export async function getContacts() {
-	const url = "mongodb://localhost:27017";
+	const url = "mongodb://mongo:27017/test";
 	try {
 		await mongoose.connect(url);
 		const Schema = mongoose.Schema;

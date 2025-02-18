@@ -1,0 +1,77 @@
+services:
+  frontend-node:
+    build:
+      context: ./front-end
+      dockerfile: Dockerfile.node
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+      - mongo
+      - mysql
+    networks:
+      - app-network
+
+  frontend-php:
+    build:
+      context: ./front-end/ftpClient
+      dockerfile: Dockerfile.php
+    ports:
+      - "8000:8000"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+      - "9876:9876"
+      - "8080:8080"
+    depends_on:
+      - mongo
+      - mysql
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/test
+      - MYSQL_HOST=mysql
+      - MYSQL_USER=ftp
+      - MYSQL_PASSWORD=ftp_hash_admin1
+      - MYSQL_DATABASE=ftp_hash
+    networks:
+      - app-network
+
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - app-network
+
+  mysql:
+    image: mysql:latest
+    container_name: mysql
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: ftp_hash
+      MYSQL_USER: ftp
+      MYSQL_PASSWORD: ftp_hash_admin1
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - app-network
+
+volumes:
+  mongo-data:
+  mysql-data:
+
+networks:
+  app-network:
+    driver: bridge
