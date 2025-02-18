@@ -3,6 +3,7 @@
     <h1>Chats</h1>
     <div class="search-bar">
       <input type="text" placeholder="Search..." v-model="searchTerm" />
+      <button @click="$router.push({ name: '' })" class="but_bck">Back</button>
     </div>
     <div v-for="chat in filteredChats" :key="chat.id" class="chat-item" @click="$emit('select-chat', chat)">
       <img :src="chat.image" alt="Profile" class="profile-pic" />
@@ -25,15 +26,15 @@ const filteredChats = computed(() => {
 });
 
 const updateChats = (contacts) => {
-	contacts.forEach(contact=> {
-		console.log(contact._id, contact.name)
-	});
+  contacts.forEach(contact => {
+    console.log(contact._id, contact.name)
+  });
   chats.value = contacts.map(contact => ({
     id: contact._id,
     name: contact.name,
-    image: "/images/default.png" 
+    image: "/images/default.png"
   }));
-	console.log(chats.value)
+  console.log(chats.value)
 };
 
 onMounted(() => {
@@ -41,10 +42,13 @@ onMounted(() => {
     updateChats(event.detail);
   });
 });
+
+
 </script>
 
 <style scoped>
 h1 {
+  color: #000;
   font-size: 1.5rem;
   padding: 10px;
   margin-bottom: 5px;
@@ -52,10 +56,23 @@ h1 {
 
 .chat-list {
   width: 30%;
+  color: #000;
   background-color: #ffffff;
   border-right: 1px solid #ccc;
   display: flex;
   flex-direction: column;
+}
+
+.but_bck {
+  font-size: 0.9em;
+  width: 4vw;
+  margin: 1vw 0vw 0vw 0vw;
+  border-radius: 0.4vw;
+}
+
+.but_bck:hover {
+  transform: scale(0.9, 0.9);
+  transition: 0.2s;
 }
 
 .search-bar {

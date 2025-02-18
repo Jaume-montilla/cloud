@@ -1,7 +1,8 @@
 <template>
   <div class="chat-container">
     <ChatList @select-chat="selectChat" />
-    <ChatWindow :selectedChat="selectedChat" :connection="connection" :messages="messages[selectedChat?.id] || []" @send-message="sendMessage" />
+    <ChatWindow :selectedChat="selectedChat" :connection="connection" :messages="messages[selectedChat?.id] || []"
+      @send-message="sendMessage" />
   </div>
 </template>
 
@@ -26,7 +27,7 @@ function getCookie(cname) {
   let name = cname + "=";
   let decodedCookie = decodeURIComponent(document.cookie);
   let ca = decodedCookie.split(';');
-  for(let i = 0; i <ca.length; i++) {
+  for (let i = 0; i < ca.length; i++) {
     let c = ca[i];
     while (c.charAt(0) == ' ') {
       c = c.substring(1);
@@ -44,22 +45,22 @@ const sendMessage = (message) => {
     if (!messages.value[selectedChat.value.id]) {
       messages.value[selectedChat.value.id] = [];
     }
-    messages.value[selectedChat.value.id].push({ ...message, sender: getCookie("uid"), receiver: "other"});
+    messages.value[selectedChat.value.id].push({ ...message, sender: getCookie("uid"), receiver: "other" });
     console.log("Mensaje enviado:", message);
   }
 };
 
 function connectWebSocket() {
-  const name = getCookie("uid"); 
-  connection.value = new WebSocket(`ws://localhost:8080/?myCustomID=${name}`); 
-  
+  const name = getCookie("uid");
+  connection.value = new WebSocket(`ws://localhost:8080/?myCustomID=${name}`);
+
   connection.value.onopen = () => {
     console.log("WebSocket Client Connected");
   };
 
   connection.value.onerror = (error) => {
     console.log("Connection Error: " + error);
-  };  
+  };
 
   connection.value.onclose = () => {
     console.log("Connection Closed");
@@ -68,7 +69,7 @@ function connectWebSocket() {
   connection.value.onmessage = async (message) => {
     try {
       let parsedData;
-      
+
       if (message.data instanceof Blob) {
         const text = await message.data.text();
         parsedData = JSON.parse(text);
