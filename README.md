@@ -1,4 +1,4 @@
-# Drijase a la rama Docker-branch y ejecute el comando:
-´´´
-docker-compose up --build
-´´´
+1. Dirígete a la rama `docker-branch` y ejecuta el siguiente comando:
+
+   ```bash
+   docker-compose up --build
