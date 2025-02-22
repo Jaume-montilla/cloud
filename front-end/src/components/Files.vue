@@ -67,28 +67,70 @@ const delet = () => {
     }
 }
 </script>
-
 <template>
   <article class="file">
-    <p @click="delet">X</p>
-    <div @click="$router.push({ name: 'file', params: {'name': fullPath} })">
+    <button @click="delet" class="but_del">X</button>
+    <div class="style_div_img" @click="$router.push({ name: 'file', params: { 'name': fullPath } })">
       <img :src="img" alt="File Icon" />
-      <h2>{{ props.fileNow }}</h2>
     </div>
+    <h2>{{ props.fileNow }}</h2>
   </article>
 </template>
 
 <style scoped>
+.style_div_img {
+  margin: 0.6vw 0vw 0vw 0vw;
+  height: auto;
+}
+
 img {
-  height: 20vw;  
+  width: 10vw;
+  height: 5vw;
 }
 
 .file {
-  border: 1px solid black;
+  display: grid;
+  justify-items: start;
+  box-shadow: 0 0 6px 2px #dcdcdc;
+  /* outline: 1px solid black; */
   cursor: pointer;
+  /* width: 10vw; */
+  /* height: 13vw; */
+  border-radius: 8px;
+  margin-bottom: 0.5vw;
 }
 
 h2 {
-  text-align: center;
+  width: 10vw;
+  height: 5vh;
+  /* margin: 0vw 0vw 0vw 0vw; */
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  font-size: 1rem;
+  margin: 0vw 0vw 1vw 0vw;
+}
+
+.but_del {
+  color: rgba(255, 255, 255, 0.8);
+  background-color: rgba(113, 113, 113, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 1.2vw;
+  height: 1.2vw;
+  font-size: 0.8em;
+  border-radius: 0.4vw;
+  cursor: pointer;
+  /* outline: 1px solid rgba(113, 113, 113); */
+  border: none;
+}
+
+.but_del:hover {
+  color: rgba(255, 255, 255);
+  background-color: rgba(113, 113, 113);
+  outline: 1px solid rgb(67, 67, 67);
+  transform: scale(1.1, 1.1);
+  transition: 0.1s;
 }
 </style>

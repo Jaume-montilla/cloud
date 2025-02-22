@@ -9,7 +9,10 @@ export async function connectToMongo() {
 
 	try {
 		console.log('Conectando a MongoDB...');
-		await mongoose.connect('mongodb://mongo:27017/test', {
+
+		/// cambiar de localhost a mongo si se usa en DOCKER!!! 
+
+		await mongoose.connect('mongodb://localhost:27017/test', {
 			useNewUrlParser: true,
 			useUnifiedTopology: true,
 		});

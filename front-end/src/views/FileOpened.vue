@@ -1,7 +1,9 @@
 <script setup>
 	import { ref, onMounted, onBeforeMount} from 'vue';
 	import { getFileInfo, updateFile } from '../services/ftp.js'
+	import { useRouter } from 'vue-router';  
 
+	const router = useRouter();  
 	const props = defineProps(['name'])
 	const info = ref([])
 	var infoOgValue = "";
@@ -42,6 +44,19 @@ if (info.value != infoOgValue) {
 	console.log(info.value)
 }
 }
+
+document.body.addEventListener('keydown', (event) => {
+    if(event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
+        save()
+    }
+});
+
+document.body.addEventListener('keydown', (event) => {
+    if(event.key === "ArrowLeft" && (event.metaKey || event.ctrlKey)) {
+		console.log("click")
+        router.push({ name: 'id'})
+    }
+});
 </script>
 
 <template>
@@ -54,8 +69,17 @@ if (info.value != infoOgValue) {
 </template>
 
 <style scoped>
+h1{
+	text-align: center;
+}
 a{
+	font-size: 1rem;
 	cursor: pointer;
+	color: blue;
+	transition: all 0.3;
+}
+a:hover{
+	font-size: 1.1rem;
 }
 textarea {
 	width: 100%;

@@ -9,8 +9,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
     http_response_code(200);
     exit();
 }
-
-$ftp_host = "backend";  
+// cambiar de localhost a backend si se usa en docker
+$ftp_host = "127.0.0.1";  
 $ftp_user = $_GET['user'];
 $ftp_pass = "";
 $ftp_port = (int)$_GET['port'];

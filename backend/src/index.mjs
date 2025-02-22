@@ -3,7 +3,6 @@ import fs from "fs";
 import path from "path";
 import { saveUser, checkUser } from "./mongo_connection.mjs";
 import startFtpServer from "./ftp.mjs";
-import cors from "cors";
 import webS from "./websocket.mjs";
 
 webS()

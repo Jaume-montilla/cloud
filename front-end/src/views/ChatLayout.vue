@@ -1,6 +1,6 @@
 <template>
   <div class="chat-container">
-    <p @click="$router.push({ name: 'file'})">Files</p>
+    <p @click="$router.push({ name: 'id'})">Files</p>
     <ChatList @select-chat="selectChat" />
     <ChatWindow :selectedChat="selectedChat" :connection="connection" :messages="messages[selectedChat?.id] || []" @send-message="sendMessage" />
   </div>
