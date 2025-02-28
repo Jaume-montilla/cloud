@@ -116,6 +116,7 @@ const resetToRoot = () => {
     </section>
     <section class="files">
       <button v-if="path" @click="resetToRoot" class="but_bckRoot">Back to Root</button>
+			<p class="msg">La funcion subir ficheros solo se encuentra disponible desde</p>
       <div class="drop_drag" :data-active="active" @dragenter.prevent="setActive" @dragover.prevent="setActive"
         @dragleave.prevent="setInactive" @drop.prevent="onDrop">
 				<div v-if="active">
@@ -141,6 +142,54 @@ const resetToRoot = () => {
 </template>
 
 <style>
+@media screen and (max-width: 768px) {
+	.drop_drag{
+		display: none;
+	}
+	.msg{
+		display: block;
+	}
+	.style_bar{
+		display: none;
+	}
+}
+
+@media screen and (min-width: 769px) {
+	.style_bar {
+		display: flex;
+		flex-direction: row;
+		justify-content: center;
+		padding: 1vw 1vw;
+		margin: 1.2vw 0vw 0vw 0vw;
+		/* outline: 1px solid #000;  */
+	}
+
+
+		.drop_drag {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			padding: 1rem 0px;
+			border: 2px dotted;
+			width: 38vw;
+			height: 35vh;
+			margin: 0 auto;
+		}
+
+		.drop_drag p {
+			display: flex;
+			flex-direction: row;
+			justify-content: space-between;
+			align-items: center;
+			padding: 0vw 0vw 0vw 0.3vw;
+		}
+
+		.msg{
+			display: none;
+		}
+	}
+
 body {
   background-color: rgba(0, 0, 0, 0);
   color: #000000;
@@ -175,7 +224,7 @@ body {
 
 .greeting {
   text-align: center;
-  font-size: 6rem;
+  font-size: 4rem;
   font-weight: bold;
   margin-top: 2vh;
 }
@@ -236,25 +285,7 @@ body {
   font-weight: bold;
 }
 
-.drop_drag {
-display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem 0px;
-	border: 2px dotted;
-  width: 38vw;
-  height: 35vh;
-  margin: 0 auto;
-}
 
-.drop_drag p {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0vw 0vw 0vw 0.3vw;
-}
 
 .icon_drag_file {
   width: 2vw;
@@ -283,17 +314,6 @@ display: flex;
   flex-direction: row;
   /* justify-content: center; */
 }
-
-/* ESTILO BARRA DE BOTONES */
-.style_bar {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  padding: 1vw 1vw;
-  margin: 1.2vw 0vw 0vw 0vw;
-  /* outline: 1px solid #000;  */
-}
-
 .button_type {
   align-items: center;
   border: 0;

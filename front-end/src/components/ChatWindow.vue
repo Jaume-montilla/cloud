@@ -89,7 +89,6 @@ const scrollToBottom = () => {
   });
 };
 
-// Observa cuando cambia el chat seleccionado
 watch(() => props.selectedChat, async (newChat) => {
   if (newChat) {
     localMessages.value = [];
@@ -161,9 +160,27 @@ onMounted(() => {
 });
 </script>
 
-
-
 <style scoped>
+
+  .chat-input {
+    width: 100%;
+    padding: 10px;
+  background-color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-top: 1px solid #ccc;
+	position: fixed;
+	bottom: 0;
+  }
+
+
+@media (min-width: 769px) {
+
+    .chat-input {
+      width: 70vw;
+}
+}
 .message-sender {
   text-align: right;
   background-color: #f0f0f0;
@@ -187,10 +204,7 @@ onMounted(() => {
 .send-message input {
   width: 80%;
 }
-</style>
-/*
 
-<style scoped>
 .chat-window {
   display: flex;
   flex-direction: column;
@@ -253,17 +267,6 @@ onMounted(() => {
   text-align: right;
 }
 
-.chat-input {
-  padding: 10px;
-  background-color: #ffffff;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  border-top: 1px solid #ccc;
-	width: 70vw;
-	position: fixed;
-	bottom: 0;
-}
 
 .chat-input input {
   flex: 1;
@@ -340,4 +343,3 @@ onMounted(() => {
   background-color: #e9e9e9;
 }
 </style>
-*/

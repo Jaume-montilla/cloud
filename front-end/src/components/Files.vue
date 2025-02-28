@@ -94,6 +94,8 @@ img {
   box-shadow: 0 0 6px 2px #dcdcdc;
   /* outline: 1px solid black; */
   cursor: pointer;
+	overflow: hidden;
+	text-overflow: ellipsis;
   /* width: 10vw; */
   /* height: 13vw; */
   border-radius: 8px;
