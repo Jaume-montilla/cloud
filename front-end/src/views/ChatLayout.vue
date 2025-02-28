@@ -1,6 +1,6 @@
 <template>
+    <p @click="$router.push({ name: 'id'})" class="go_back">Go to files</p>
   <div class="chat-container">
-    <p @click="$router.push({ name: 'id'})">Files</p>
     <ChatList @select-chat="selectChat" />
     <ChatWindow :selectedChat="selectedChat" :connection="connection" :messages="messages[selectedChat?.id] || []" @send-message="sendMessage" />
   </div>
@@ -127,4 +127,11 @@ onBeforeMount(() => {
 .chat-window {
   width: 70%;
 }
+
+.go_back{
+	color: blue;
+	cursor: pointer;
+	margin-left: 1pc;
+}
+
 </style>

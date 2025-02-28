@@ -1,7 +1,7 @@
 <template>
   <div v-if="selectedChat" class="chat-window">
     <div class="chat-header">
-      <img :src="selectedChat.image" alt="Profile" class="profile-pic" />
+      <img src="../assets/default.webp" alt="Profile" class="profile-pic" />
       <span>{{ selectedChat.name }}</span>
     </div>
     <div v-for="message in localMessages" :key="message._id" 
@@ -260,7 +260,9 @@ onMounted(() => {
   align-items: center;
   gap: 10px;
   border-top: 1px solid #ccc;
-  position: relative;
+	width: 70vw;
+	position: fixed;
+	bottom: 0;
 }
 
 .chat-input input {

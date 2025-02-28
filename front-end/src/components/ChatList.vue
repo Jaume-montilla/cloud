@@ -5,7 +5,7 @@
       <input type="text" placeholder="Search..." v-model="searchTerm" />
     </div>
     <div v-for="chat in filteredChats" :key="chat.id" class="chat-item" @click="$emit('select-chat', chat)">
-      <img :src="chat.image" alt="Profile" class="profile-pic" />
+      <img src="../assets/default.webp" alt="Profile" class="profile-pic" />
       <span>{{ chat.name }}</span>
     </div>
   </div>
@@ -31,7 +31,7 @@ const updateChats = (contacts) => {
   chats.value = contacts.map(contact => ({
     id: contact._id,
     name: contact.name,
-    image: "/images/default.png" 
+    image: "../assets/default.webp" 
   }));
 	console.log(chats.value)
 };
